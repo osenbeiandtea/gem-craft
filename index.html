@@ -8,7 +8,7 @@
 <meta property="og:title" content="ジェムクラフト">
 <meta property="og:description" content="採掘 → 研磨 → 加工 → 売却。宝石職人になろう。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238fe3ff'/%3E%3Cstop offset='1' stop-color='%23b07cff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='%231b1512'/%3E%3Cpolygon points='32%2C9 52%2C24 32%2C56 12%2C24' fill='url%28%23g%29' stroke='%23fff' stroke-width='2' stroke-linejoin='round'/%3E%3Cpolygon points='32%2C9 52%2C24 12%2C24' fill='%23fff' fill-opacity='.4'/%3E%3Cpolygon points='32%2C56 12%2C24 32%2C24' fill='%23000' fill-opacity='.15'/%3E%3Ccircle cx='24' cy='19' r='2.5' fill='%23fff'/%3E%3C/svg%3E">
-<title>ジェムクラフト v3.3</title>
+<title>ジェムクラフト v3.4</title>
 <style>
 :root{--bg:#1b1512;--panel:#2a211c;--panel2:#34281f;--line:#4a3a2d;--ink:#f4e9dc;--sub:#b9a58f;--acc:#f0a24a;--good:#7fd18b;--bad:#e56b6b}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -97,7 +97,7 @@ footer{padding:14px 14px 90px;text-align:center;font-size:11px;color:var(--sub)}
     <div class="bar"><i id="hBar"></i></div>
   </header>
   <main id="main"></main>
-  <footer>ジェムクラフト v3.3<br>企画・構成 FILWEN ／ アプリ開発・デザイン: Claude (Anthropic)<br>© 2026 FILWEN<br><button class="btn sm ghost" style="margin-top:8px" onclick="resetAll()">最初からやり直す</button></footer>
+  <footer>ジェムクラフト v3.4<br>Gem Craft © 2026 FILWEN<br>Planning &amp; Creative Direction: FILWEN<br>Developed with Claude (Anthropic)<br><span style="font-size:10px">本ゲームの宝石・通貨・オークションはすべて架空のものであり、現実の金銭取引はありません。<br>All gems, currency and auctions in this game are fictional. No real-money transactions are involved.</span><br><button class="btn sm ghost" style="margin-top:8px" onclick="resetAll()">最初からやり直す</button></footer>
 </div>
 <nav id="nav"></nav>
 <div id="toast"></div>
@@ -172,7 +172,7 @@ const grade=q=>q>=90?'極上':q>=70?'良':q>=40?'並':'粗';
 const gemVal=(g,sz,q)=>GEMS[g].v*SM[sz]*qMult(q);
 const ia=(g,x='')=>`class="item ${GEMS[g].r>=2?'rare':''} ${x}" style="--gc:${GEMS[g].fx}"`;
 
-const S0=()=>({gold:60,day:1,energy:BASEE,pick:1,wheel:1,bench:1,bag:1,eye:1,app:1,eat:0,buff:false,aucDay:0,aucSlots:0,aucLast:'',aucN:0,diff:1,sat:{},clear:-1,aucBudget:{},awake:false,awakeNew:false,throne:{stage:0,q:0},throneNew:false,quest:{stage:0,tiaraQ:0,crownQ:0},dex:{},crafted:0,best:null,ending:false,questNew:false,depth:0,maxDepth:0,rough:[],pol:[],jew:[],orders:[],served:0,sold:0,uid:1,rock:null,dem:newDemand(),snd:true,tab:'mine'});
+const S0=()=>({gold:60,day:1,energy:BASEE,pick:1,wheel:1,bench:1,bag:1,eye:1,app:1,eat:0,buff:false,aucDay:0,aucSlots:0,aucLast:'',aucN:0,diff:1,sat:{},clear:-1,aucBudget:{},awake:false,awakeNew:false,mu:{day:0,n:0},throne:{stage:0,q:0},throneNew:false,quest:{stage:0,tiaraQ:0,crownQ:0},dex:{},crafted:0,best:null,ending:false,questNew:false,depth:0,maxDepth:0,rough:[],pol:[],jew:[],orders:[],served:0,sold:0,uid:1,rock:null,dem:newDemand(),snd:true,tab:'mine'});
 function newDemand(){const r=()=>Math.round((0.7+Math.random()*0.7)*100)/100;return{ring:r(),pendant:r(),bracelet:r(),earring:r()}}
 let S=null;
 try{S=JSON.parse(localStorage.getItem('filwen-gemcraft-save'))}catch(e){}
@@ -298,6 +298,7 @@ function vMine(){
     return `<button class="btn ${S.depth===i?'':'ghost'}" ${(!open&&(!buy||S.gold<d.cost))?'disabled':''} onclick="goDepth(${i})">${lbl}</button>`}).join('');
   return `<div class="card"><h3>⛏ ${DEPTHS[S.depth].n}</h3><div class="muted">深いほど岩は硬いけど、いい石が出やすい。ツルハシLv${S.pick}</div>
   <div class="opts g2" style="margin-top:8px">${dbtn}</div>
+  ${S.awake?`<div id="muBox" style="text-align:center;margin-top:8px">${muHtml()}</div>`:''}
   <div id="stage" onclick="mine()"><div id="rockwrap">${rockSvg(S.rock.hp/S.rock.max)}</div><div id="pick">${S.awake?PICK_GOLD:PICK_SVG}</div><div id="fx"></div></div>
   <div style="text-align:center">${ch.map((p,i)=>p>0?`<span class="pill">${GEMS[i].n} ${Math.max(1,Math.round(p*100))}%</span>`:'').join('')}</div></div>
   <div class="card"><h3>原石袋</h3><div id="bag">${bagHtml()}</div></div>`;
@@ -316,20 +317,32 @@ function swing(){
   if(p._a)p._a.cancel();
   p._a=p.animate([{transform:'rotate(30deg)'},{transform:'rotate(-48deg)',offset:.38},{transform:'rotate(-42deg)',offset:.5},{transform:'rotate(30deg)'}],{duration:280,easing:'ease-out'});
 }
+function muOn(){return !!(S.awake&&S.mu&&S.mu.n>0)}
+function muHtml(){
+  if(muOn())return `<div class="gold" style="font-weight:800">⚡ 無双タイム発動中! 残り ${S.mu.n} 回(体力消費なし)</div>`;
+  if(S.mu.day===S.day)return `<button class="btn ghost" disabled>⚡ 無双タイムは本日使用済み(明日また)</button>`;
+  return `<button class="btn" style="width:100%" onclick="muStart()">⚡ 無双タイム発動(1日1回・10回連打)</button>`;
+}
+function muUI(){const b=document.getElementById('muBox');if(b)b.innerHTML=muHtml()}
+function muStart(){
+  if(!S.awake||muOn()||S.mu.day===S.day)return;
+  ac();S.mu={day:S.day,n:10};save();SFX.rare(2);toast('⚡ 無双タイム!岩を連打しよう');muUI();
+}
 function mine(){
-  if(S.energy<=0){SFX.err();toast('体力がない…🌙 眠って回復しよう');return}
+  const mu=muOn();
+  if(!mu&&S.energy<=0){SFX.err();toast('体力がない…🌙 眠って回復しよう');return}
   ac();
-  S.energy--;S.rock.hp-=pickPow();
+  if(mu){S.mu.n--;S.rock.hp=0}else{S.energy--;S.rock.hp-=pickPow()}
   let drop=null;
   if(S.rock.hp<=0){
     const g=pickGem(),r=Math.random(),dd=S.depth*0.06;
     const s=r<0.6-dd?0:r<0.9-dd?1:2;
     drop={id:S.uid++,g,s};S.rough.push(drop);dexMark(g,0);newRock();
   }
-  save();header();swing();
-  setTimeout(()=>impact(drop),90);
+  save();header();swing();muUI();
+  setTimeout(()=>impact(drop,mu),90);
 }
-function impact(drop){
+function impact(drop,mu){
   const box=document.getElementById('fx'),rw=document.getElementById('rockwrap');
   const D=DEPTHS[S.depth];
   if(!drop){
@@ -341,6 +354,7 @@ function impact(drop){
     return;
   }
   SFX.crack();
+  if(mu)burst(box,128,129,['#fff3b0','#ffd35a','#fff'],14,{star:true,size:12,v:190,spread:Math.PI*2,dir:0,g:20,dur:700});
   if(S.awake)burst(box,128,129,['#ffd35a','#fff3b0','#ffb300'],20,{star:true,size:9,v:150,spread:Math.PI*2,dir:0,g:60,dur:900});
   burst(box,128,129,D.bg.concat(['#c9b79f','#3a2e25']),26,{dir:-Math.PI/2,spread:Math.PI*1.7,v:140,size:9,dur:800});
   if(rw){rw.innerHTML=rockSvg(1);rw.animate([{transform:'scale(.7)',opacity:0},{transform:'scale(1)',opacity:1}],{duration:200,easing:'ease-out'})}

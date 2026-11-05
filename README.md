@@ -23,6 +23,7 @@
 - 宝物庫（作った名品や図鑑を飾る部屋。図鑑がそろうほど豪華に）
 - 難易度（やさしい／ふつう／むずかしい／修行）。途中で変更できます
 - 同じ宝石を売り続けると相場が下がる、オークションの来場者には予算がある、など終盤の駆け引き
+- 修行モードで全強化Lv15にすると「覚醒」。1日1回、体力を使わず10回連打で岩が次々砕ける「無双タイム」が使える
 - レア度に応じた演出（効果音もすべてブラウザ内で合成）
 - 外部通信なし・AI APIなし。セーブはブラウザの localStorage に保存されます
 
@@ -34,7 +35,16 @@
 
 ## クレジット
 
-企画・構成: FILWEN
-使用AIツール: アプリ開発・デザイン — Claude (Anthropic)
+Gem Craft © 2026 FILWEN
+Planning & Creative Direction: FILWEN
+Developed with Claude (Anthropic)
 
-© 2026 FILWEN
+## 注意事項 / Notice
+
+セーブデータはお使いのブラウザ(localStorage)にのみ保存されます。ブラウザのデータを消去したり、別の端末・別のブラウザで開いたりすると、進行状況は引き継がれません。
+Save data is stored only in your browser (localStorage). Clearing browser data or switching devices/browsers will lose your progress.
+
+本ゲームの宝石・通貨・オークションはすべて架空のものであり、現実の金銭取引はありません。
+All gems, currency and auctions in this game are fictional. No real-money transactions are involved.
+
+画像素材は使用していません。アイコン・ファビコン・宝石などの図柄はすべてコードで生成したSVG、効果音はブラウザ内で合成しています。
