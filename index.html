@@ -8,7 +8,7 @@
 <meta property="og:title" content="ジェムクラフト">
 <meta property="og:description" content="採掘 → 研磨 → 加工 → 売却。宝石職人になろう。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238fe3ff'/%3E%3Cstop offset='1' stop-color='%23b07cff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='%231b1512'/%3E%3Cpolygon points='32%2C9 52%2C24 32%2C56 12%2C24' fill='url%28%23g%29' stroke='%23fff' stroke-width='2' stroke-linejoin='round'/%3E%3Cpolygon points='32%2C9 52%2C24 12%2C24' fill='%23fff' fill-opacity='.4'/%3E%3Cpolygon points='32%2C56 12%2C24 32%2C24' fill='%23000' fill-opacity='.15'/%3E%3Ccircle cx='24' cy='19' r='2.5' fill='%23fff'/%3E%3C/svg%3E">
-<title>ジェムクラフト v3.1</title>
+<title>ジェムクラフト v3.2</title>
 <style>
 :root{--bg:#1b1512;--panel:#2a211c;--panel2:#34281f;--line:#4a3a2d;--ink:#f4e9dc;--sub:#b9a58f;--acc:#f0a24a;--good:#7fd18b;--bad:#e56b6b}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -31,6 +31,20 @@ nav button b{display:block;font-size:20px;font-weight:400}
 nav button.on{color:var(--acc)}
 nav.many button{font-size:10px}
 nav.many button b{font-size:18px}
+body.awake{--acc:#ffd35a}
+body.awake header{background:linear-gradient(#4a3611,#1b1512);border-bottom-color:#b8892a}
+body.awake nav{border-top-color:#b8892a}
+body.awake .card{border-color:#6b5320}
+body.awake .gold{background:linear-gradient(90deg,#fff3b0,#ffc83a,#fff3b0);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 3s linear infinite}
+body.awake #pick{filter:drop-shadow(0 0 7px #ffd35a)}
+@keyframes shine{to{background-position:-200% 0}}
+.hall{border:2px solid #7a5a2a;border-radius:14px;padding:10px;margin-bottom:10px;background:radial-gradient(circle at 50% 0,#ffffff22,transparent 60%),var(--wall)}
+.hall.l4{border-color:#ffd35a;box-shadow:0 0 18px #ffd35a66;animation:gl2 2.4s ease-in-out infinite alternate}
+@keyframes gl2{from{box-shadow:0 0 8px #ffd35a44}to{box-shadow:0 0 24px #ffd35aaa}}
+.hall .ttl{text-align:center;font-weight:700;margin-bottom:6px;color:#ffe9b0}
+.shelf{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:8px 2px 10px;border-bottom:6px solid #5a3a1a;margin-bottom:8px;background:linear-gradient(transparent 70%,#0004)}
+.slot{width:64px;text-align:center;font-size:10px;line-height:1.3}
+.slot.dim{opacity:.22;filter:grayscale(1)}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--acc);margin-left:2px;vertical-align:top}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
 .card h3{margin:0 0 6px;font-size:14px;color:var(--acc)}
@@ -83,7 +97,7 @@ footer{padding:14px 14px 90px;text-align:center;font-size:11px;color:var(--sub)}
     <div class="bar"><i id="hBar"></i></div>
   </header>
   <main id="main"></main>
-  <footer>ジェムクラフト v3.1<br>企画・構成 FILWEN ／ アプリ開発・デザイン: Claude (Anthropic)<br>© 2026 FILWEN<br><button class="btn sm ghost" style="margin-top:8px" onclick="resetAll()">最初からやり直す</button></footer>
+  <footer>ジェムクラフト v3.2<br>企画・構成 FILWEN ／ アプリ開発・デザイン: Claude (Anthropic)<br>© 2026 FILWEN<br><button class="btn sm ghost" style="margin-top:8px" onclick="resetAll()">最初からやり直す</button></footer>
 </div>
 <nav id="nav"></nav>
 <div id="toast"></div>
@@ -158,7 +172,7 @@ const grade=q=>q>=90?'極上':q>=70?'良':q>=40?'並':'粗';
 const gemVal=(g,sz,q)=>GEMS[g].v*SM[sz]*qMult(q);
 const ia=(g,x='')=>`class="item ${GEMS[g].r>=2?'rare':''} ${x}" style="--gc:${GEMS[g].fx}"`;
 
-const S0=()=>({gold:60,day:1,energy:BASEE,pick:1,wheel:1,bench:1,bag:1,eye:1,app:1,eat:0,buff:false,aucDay:0,aucSlots:0,aucLast:'',aucN:0,diff:1,sat:{},clear:-1,aucBudget:{},quest:{stage:0,tiaraQ:0,crownQ:0},dex:{},crafted:0,best:null,ending:false,questNew:false,depth:0,maxDepth:0,rough:[],pol:[],jew:[],orders:[],served:0,sold:0,uid:1,rock:null,dem:newDemand(),snd:true,tab:'mine'});
+const S0=()=>({gold:60,day:1,energy:BASEE,pick:1,wheel:1,bench:1,bag:1,eye:1,app:1,eat:0,buff:false,aucDay:0,aucSlots:0,aucLast:'',aucN:0,diff:1,sat:{},clear:-1,aucBudget:{},awake:false,awakeNew:false,throne:{stage:0,q:0},throneNew:false,quest:{stage:0,tiaraQ:0,crownQ:0},dex:{},crafted:0,best:null,ending:false,questNew:false,depth:0,maxDepth:0,rough:[],pol:[],jew:[],orders:[],served:0,sold:0,uid:1,rock:null,dem:newDemand(),snd:true,tab:'mine'});
 function newDemand(){const r=()=>Math.round((0.7+Math.random()*0.7)*100)/100;return{ring:r(),pendant:r(),bracelet:r(),earring:r()}}
 let S=null;
 try{S=JSON.parse(localStorage.getItem('filwen-gemcraft-save'))}catch(e){}
@@ -175,7 +189,7 @@ function noise(d,vol=.2,f=1800,t0=0){const a=ac();if(!a)return;try{const n=Math.
 const PENT=[0,2,4,7,9];
 const nf=i=>523.25*Math.pow(2,(PENT[i%5]+12*Math.floor(i/5))/12);
 const SFX={
- hit(){noise(.07,.5,2600+Math.random()*1400);tone(1100+Math.random()*300,.06,'triangle',.08);tone(130,.13,'sine',.3,0,-70)},
+ hit(){noise(.07,.5,2600+Math.random()*1400);tone(1100+Math.random()*300,.06,'triangle',.08);tone(130,.13,'sine',.3,0,-70);if(S.awake)tone(2093,.12,'triangle',.05,.03)},
  crack(){noise(.3,.55,700);tone(90,.28,'sawtooth',.14,0,-45);noise(.12,.3,3500,.05)},
  found(t){for(let i=0;i<2+t*2;i++)tone(nf(i+t),.2,'triangle',.17,i*.07)},
  rare(t){const n=t>=5?11:t>=4?9:t>=3?7:5;for(let i=0;i<n;i++)tone(nf(i+2),.55,'triangle',.15,i*.085);tone(nf(n+2),1.1,'sine',.16,n*.085);noise(.9,.12,6500,.15);if(t>=3){tone(nf(0),1,'sine',.14,0);tone(nf(2),1,'sine',.1,0)}if(t>=5){for(let i=0;i<6;i++)tone(nf(i+9),.4,'sine',.1,.9+i*.06)}},
@@ -238,6 +252,7 @@ function rockSvg(frac){
 }
 const PICK_SVG=`<svg width="70" height="130" viewBox="0 0 70 130"><line x1="35" y1="130" x2="35" y2="22" stroke="#9a6a35" stroke-width="8" stroke-linecap="round"/><path d="M5 38 Q35 2 65 38" fill="none" stroke="#c9d0da" stroke-width="10" stroke-linecap="round"/><path d="M5 38 Q35 6 65 38" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="3" stroke-linecap="round"/></svg>`;
 
+const PICK_GOLD=PICK_SVG.replace('#9a6a35','#8a5a1b').replace('#c9d0da','#ffd35a').replace('#fff','#fff6c8');
 /* ---------- UI core ---------- */
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1900)}
 function rank(){let r=RANKS[0];for(const x of RANKS)if(S.sold>=x[0])r=x;return r}
@@ -245,7 +260,7 @@ function nextRank(){for(const x of RANKS)if(S.sold<x[0])return x;return null}
 function header(){
   document.getElementById('hGold').textContent='💰 '+Math.round(S.gold).toLocaleString()+' G';
   const nr=nextRank();
-  document.getElementById('hRank').textContent=(S.ending?'👑 ':'')+(S.clear===3?'🏅 ':'')+rank()[1]+(nr?`(次の称号まで売上あと ${(nr[0]-S.sold).toLocaleString()}G)`:'(最高称号!)');
+  document.getElementById('hRank').textContent=(S.awake?'✨ ':'')+(S.throne&&S.throne.stage===2?'🏛 ':'')+(S.ending?'👑 ':'')+(S.clear===3?'🏅 ':'')+rank()[1]+(nr?`(次の称号まで売上あと ${(nr[0]-S.sold).toLocaleString()}G)`:'(最高称号!)');
   document.getElementById('hDay').textContent=S.day+'日目 ・ '+DF().n;
   document.getElementById('hEn').textContent=S.energy+' / '+maxE();
   document.getElementById('hBar').style.width=(S.energy/maxE()*100)+'%';
@@ -254,7 +269,11 @@ function header(){
 const TABS=[['mine','⛏','採掘'],['polish','✨','研磨'],['craft','💍','加工'],['order','📜','注文'],['auc','🔨','競売'],['sell','💰','売却'],['shop','🔧','強化']];
 function setTab(t){S.tab=t;render()}
 function tabList(){return S.quest.stage>=1?TABS.concat([['quest','👑','王室']]):TABS}
+const allMax=()=>['pick','wheel','bench','bag','eye','app'].every(k=>S[k]>=MAXLV);
+function awakeCheck(){if(!S.awake&&S.diff===3&&allMax()){S.awake=true;S.awakeNew=true}}
+function throneCheck(){if(S.awake&&S.ending&&S.throne&&S.throne.stage===0){S.throne.stage=1;S.throneNew=true}}
 function render(){
+  awakeCheck();throneCheck();document.body.classList.toggle('awake',!!S.awake);
   header();
   const tabs=tabList();
   if(!tabs.some(t=>t[0]===S.tab))S.tab='mine';
@@ -279,7 +298,7 @@ function vMine(){
     return `<button class="btn ${S.depth===i?'':'ghost'}" ${(!open&&(!buy||S.gold<d.cost))?'disabled':''} onclick="goDepth(${i})">${lbl}</button>`}).join('');
   return `<div class="card"><h3>⛏ ${DEPTHS[S.depth].n}</h3><div class="muted">深いほど岩は硬いけど、いい石が出やすい。ツルハシLv${S.pick}</div>
   <div class="opts g2" style="margin-top:8px">${dbtn}</div>
-  <div id="stage" onclick="mine()"><div id="rockwrap">${rockSvg(S.rock.hp/S.rock.max)}</div><div id="pick">${PICK_SVG}</div><div id="fx"></div></div>
+  <div id="stage" onclick="mine()"><div id="rockwrap">${rockSvg(S.rock.hp/S.rock.max)}</div><div id="pick">${S.awake?PICK_GOLD:PICK_SVG}</div><div id="fx"></div></div>
   <div style="text-align:center">${ch.map((p,i)=>p>0?`<span class="pill">${GEMS[i].n} ${Math.max(1,Math.round(p*100))}%</span>`:'').join('')}</div></div>
   <div class="card"><h3>原石袋</h3><div id="bag">${bagHtml()}</div></div>`;
 }
@@ -315,12 +334,14 @@ function impact(drop){
   const D=DEPTHS[S.depth];
   if(!drop){
     SFX.hit();
+    if(S.awake)burst(box,128,129,['#ffd35a','#fff3b0','#ffb300'],8,{star:true,size:7,v:110,dir:-2.4,spread:1.8,g:40,dur:700});
     burst(box,128,129,['#fff'],2,{star:true,size:16,v:6,spread:6,g:0,dur:220});
     burst(box,128,129,D.bg.concat(['#c9b79f']),10,{dir:-2.4,spread:1.6,v:95,size:8});
     if(rw){rw.innerHTML=rockSvg(S.rock.hp/S.rock.max);rw.animate([{transform:'translate(0,0)'},{transform:'translate(-6px,2px)'},{transform:'translate(4px,-1px)'},{transform:'translate(0,0)'}],{duration:150})}
     return;
   }
   SFX.crack();
+  if(S.awake)burst(box,128,129,['#ffd35a','#fff3b0','#ffb300'],20,{star:true,size:9,v:150,spread:Math.PI*2,dir:0,g:60,dur:900});
   burst(box,128,129,D.bg.concat(['#c9b79f','#3a2e25']),26,{dir:-Math.PI/2,spread:Math.PI*1.7,v:140,size:9,dur:800});
   if(rw){rw.innerHTML=rockSvg(1);rw.animate([{transform:'scale(.7)',opacity:0},{transform:'scale(1)',opacity:1}],{duration:200,easing:'ease-out'})}
   const bag=document.getElementById('bag');if(bag)bag.innerHTML=bagHtml();
@@ -453,7 +474,7 @@ function doCraft(){
   S.jew.push({id:gs[0].id,g:gs[0].g,s:sz,q,type:craft.type,metal:craft.metal,value:v,pair:ear});
   S.crafted=(S.crafted||0)+1;
   const nm=`${GEMS[gs[0].g].n}の${MT[craft.metal].n}${TY[craft.type].n}`;
-  if(!S.best||v>S.best.v)S.best={v,name:nm};
+  if(!S.best||v>S.best.v)S.best={v,name:nm,g:gs[0].g,type:craft.type,metal:craft.metal};
   craft.sel=[];SFX.craft();toast('✨ '+nm+'が完成!');render();
 }
 
@@ -609,20 +630,21 @@ function lotStep(){
 
 /* ---------- Royal quest / ending / dex ---------- */
 const QUESTS={
- tiara:{n:'女王のティアラ',ic:'👸',cost:20000,e:10,reward:1.4,
+ tiara:{n:'女王のティアラ',ic:'👸',cost:20000,e:10,reward:1.4,st:5,hf:.85,
   desc:'王宮の女王が、世界に二つとないティアラを望んでいる。プラチナの台座に、ダイヤとサファイアを並べ、中央に希少な一粒を。',
   req:[{g:[5],q:70,n:2,l:'ダイヤ'},{g:[3],q:70,n:2,l:'サファイア'},{g:[16,19],q:0,n:1,l:'ピンクダイヤ か パパラチアサファイア'}]},
- crown:{n:'王の王冠',ic:'🤴',cost:60000,e:15,reward:1.5,
+ crown:{n:'王の王冠',ic:'🤴',cost:60000,e:15,reward:1.5,st:5,hf:.85,
   desc:'ティアラを見た王が、自らの王冠の仕立てを頼んできた。中心には、星の核の底に眠るという青い輝きを。',
-  req:[{g:[18],q:70,n:1,l:'ブルーダイヤモンド'},{g:[4],q:70,n:3,l:'エメラルド'},{g:[13],q:70,n:2,l:'ルビー'},{g:[17],q:0,n:1,l:'パライバトルマリン'}]}
+  req:[{g:[18],q:70,n:1,l:'ブルーダイヤモンド'},{g:[4],q:70,n:3,l:'エメラルド'},{g:[13],q:70,n:2,l:'ルビー'},{g:[17],q:0,n:1,l:'パライバトルマリン'}]},
+ throne:{n:'黄金の玉座',ic:'🏛',cost:250000,e:20,reward:1.2,st:7,hf:.4,
+  desc:'王が望むのは、世界でいちばん希少な宝石を散りばめた黄金の玉座。修行を極めたあなたにしか、頼めない仕事。仕上げの帯はとても狭いよ。',
+  req:[{g:[16],q:70,n:1,l:'ピンクダイヤ'},{g:[17],q:70,n:1,l:'パライバトルマリン'},{g:[18],q:70,n:1,l:'ブルーダイヤモンド'},{g:[19],q:70,n:1,l:'パパラチアサファイア'},{g:[5],q:70,n:3,l:'ダイヤ'},{g:[4],q:70,n:3,l:'エメラルド'},{g:[13],q:70,n:3,l:'ルビー'},{g:[3],q:70,n:3,l:'サファイア'}]}
 };
 function reqRows(k){return QUESTS[k].req.map(r=>{const have=S.pol.filter(p=>r.g.includes(p.g)&&p.q>=r.q).length;return{...r,have,ok:have>=r.n}})}
-function questReady(){
-  if(S.quest.stage!==1&&S.quest.stage!==2)return false;
-  const k=S.quest.stage===1?'tiara':'crown',Q=QUESTS[k];
-  return reqRows(k).every(r=>r.ok)&&S.gold>=Q.cost&&S.energy>=Q.e;
-}
+function curQuestKey(){if(S.quest.stage===1)return 'tiara';if(S.quest.stage===2)return 'crown';if(S.quest.stage>=3&&S.throne&&S.throne.stage===1)return 'throne';return null}
+function questReady(){const k=curQuestKey();if(!k)return false;const Q=QUESTS[k];return reqRows(k).every(r=>r.ok)&&S.gold>=Q.cost&&S.energy>=Q.e}
 function royalSvg(k,s=64){
+  if(k==='throne')return `<svg width="${s}" height="${s}" viewBox="0 0 64 64"><rect x="16" y="6" width="32" height="34" rx="6" fill="#f2c14e" stroke="#fff6" stroke-width="2"/><rect x="8" y="34" width="48" height="10" rx="3" fill="#c0304a" stroke="#fff6"/><rect x="12" y="44" width="6" height="14" fill="#e0a92e"/><rect x="46" y="44" width="6" height="14" fill="#e0a92e"/><circle cx="32" cy="18" r="5" fill="#3aa0ff" stroke="#fff"/><circle cx="23" cy="28" r="3" fill="#ff8fc8"/><circle cx="41" cy="28" r="3" fill="#19e6d8"/></svg>`;
   if(k==='tiara')return `<svg width="${s}" height="${s}" viewBox="0 0 64 64"><path d="M6 48 Q32 34 58 48" fill="none" stroke="#e3f0ff" stroke-width="5" stroke-linecap="round"/><polygon points="32,8 39,28 25,28" fill="#bfefff" stroke="#fff"/><polygon points="18,22 23,36 13,36" fill="#2f6fd6" stroke="#fff"/><polygon points="46,22 51,36 41,36" fill="#2f6fd6" stroke="#fff"/><circle cx="32" cy="39" r="3.5" fill="#ff8fc8" stroke="#fff"/></svg>`;
   return `<svg width="${s}" height="${s}" viewBox="0 0 64 64"><polygon points="8,48 11,18 24,32 32,10 40,32 53,18 56,48" fill="#f2c14e" stroke="#fff6" stroke-width="2"/><rect x="8" y="46" width="48" height="8" rx="2" fill="#e0a92e"/><circle cx="32" cy="26" r="4.5" fill="#3aa0ff" stroke="#fff"/><circle cx="19" cy="40" r="3" fill="#27a869"/><circle cx="45" cy="40" r="3" fill="#d6203c"/></svg>`;
 }
@@ -634,28 +656,61 @@ function showStory(o){
 }
 function storyClose(){const cb=STORY_CB;STORY_CB=null;closeOv();if(cb)cb()}
 function maybeStory(){
-  if(!S.questNew||PG||LOT)return;
+  if(PG||LOT)return;
+  if(!(S.questNew||S.awakeNew||S.throneNew))return;
   if(document.getElementById('ov').classList.contains('on'))return;
-  S.questNew=false;save();
-  SFX.rare(3);
-  showStory({ic:'🏰',title:'王宮からの使者',paras:['あなたの工房の評判は、いつのまにか王国じゅうに広まっていた。','ある朝、王宮の使者が訪ねてくる。「女王陛下が、世界に二つとないティアラを望んでおられます。引き受けていただければ、王室御用達の栄誉を」','依頼の詳しい内容は、新しく現れた「👑王室」タブで見られるよ。']});
+  if(S.questNew){
+    S.questNew=false;save();SFX.rare(3);
+    showStory({ic:'🏰',title:'王宮からの使者',paras:['あなたの工房の評判は、いつのまにか王国じゅうに広まっていた。','ある朝、王宮の使者が訪ねてくる。「女王陛下が、世界に二つとないティアラを望んでおられます。引き受けていただければ、王室御用達の栄誉を」','依頼の詳しい内容は、新しく現れた「👑王室」タブで見られるよ。']});
+    return;
+  }
+  if(S.awakeNew){
+    S.awakeNew=false;save();SFX.fanfare();
+    showStory({ic:'✨',title:'工房の覚醒',paras:['ツルハシも、研磨機も、作業台も、すべてが極みに達した。修行の日々が、道具に魂を宿らせたのかもしれない。','金色の光が工房を包む。あなたは「無双の職人」と呼ばれるようになった。','ツルハシは金色に輝き、岩は金の粉をまいて砕ける。'],btn:'金色の工房へ'});
+    burst(document.getElementById('ov'),innerWidth/2,innerHeight/3,['#ffd35a','#fff3b0','#ffb300','#fff'],70,{star:true,size:12,v:240,spread:Math.PI*2,dir:0,g:80,dur:1700});
+    return;
+  }
+  if(S.throneNew){
+    S.throneNew=false;save();SFX.rare(4);
+    showStory({ic:'🏛',title:'王からの最後の依頼',paras:['王冠を戴いた王が、再びあなたの工房を訪ねてきた。','「余の隣に置く玉座を作ってほしい。世界でいちばん希少な宝石を使って、この国の誇りになるものを」','超レアの宝石4種と、王国の名宝が必要になる。依頼の詳細は「👑王室」タブへ。']});
+  }
 }
-function vQuest(){
-  const st=S.quest.stage;
-  if(st>=3)return `<div class="card"><h3>👑 王室御用達</h3><div style="font-size:14px">女王のティアラ(品質${S.quest.tiaraQ})と、王の王冠(品質${S.quest.crownQ})を納めた。</div><button class="btn" style="margin-top:8px" onclick="showEnding(true)">エンディングをもう一度見る</button></div><div class="card muted">ここから先は自由な時間。図鑑のコンプリート(強化タブ)や、もっと高価な宝石づくりを楽しもう。</div>`;
-  const k=st===1?'tiara':'crown',Q=QUESTS[k],rows=reqRows(k);
-  const ok=questReady();
+function questCard(k){
+  const Q=QUESTS[k],rows=reqRows(k),ok=questReady();
   return `<div class="card"><h3>${Q.ic} 依頼: ${Q.n}</h3><div style="font-size:13px;line-height:1.6">${Q.desc}</div></div>
   <div class="card"><h3>必要なもの</h3>${rows.map(r=>`<div class="row" style="margin:4px 0"><span>${r.ok?'✅':'⬜'} ${r.l}${r.q?'('+grade(r.q)+'以上)':''} ×${r.n}</span><span class="muted">${Math.min(r.have,r.n)}/${r.n}</span></div>`).join('')}
   <div class="row" style="margin:4px 0"><span>${S.gold>=Q.cost?'✅':'⬜'} 制作費 ${Q.cost.toLocaleString()}G</span><span class="muted">${Math.round(S.gold).toLocaleString()}G</span></div>
   <div class="row" style="margin:4px 0"><span>${S.energy>=Q.e?'✅':'⬜'} 体力 ${Q.e}</span><span class="muted">${S.energy}</span></div>
-  <div class="muted" style="margin-top:6px">使うのは磨いた宝石。納品すると、制作費の${Math.round(Q.reward*100)}%が報酬として戻ってくるよ。</div>
+  <div class="muted" style="margin-top:6px">使うのは磨いた宝石。納品すると、制作費の${Math.round(Q.reward*100)}%が報酬として戻ってくるよ。仕上げは${Q.st}回勝負。</div>
   <button class="btn" style="width:100%;margin-top:8px" ${ok?'':'disabled'} onclick="startRoyal('${k}')">特別な仕上げをはじめる</button></div>`;
 }
+const HALLN=['こじんまりした飾り棚','立派な飾り棚','小さなギャラリー','宝石の大広間','黄金の宝物殿'];
+const hallLevel=()=>{const n=Object.keys(S.dex||{}).length;return n>=20?4:n>=15?3:n>=10?2:n>=5?1:0};
+function vHall(){
+  const lv=hallLevel(),wall=['#3a2a20','#3a2f4a','#2c3e50','#4a2f3f','#5a4210'][lv];
+  const royal=[['tiara','女王のティアラ',S.quest.tiaraQ>0,S.quest.tiaraQ],['crown','王の王冠',S.quest.crownQ>0,S.quest.crownQ],['throne','黄金の玉座',S.throne&&S.throne.stage===2,S.throne?S.throne.q:0]];
+  const ttl=q=>q>=90?'傑作':q>=70?'名品':q>=40?'上出来':'及第';
+  const b=S.best;
+  return `<div class="hall ${lv===4?'l4':''}" style="--wall:${wall}"><div class="ttl">🏛 宝物庫 — ${HALLN[lv]}</div>
+  <div class="shelf">${royal.map(r=>`<div class="slot ${r[2]?'':'dim'}">${royalSvg(r[0],52)}<div>${r[2]?r[1]:'？？？'}</div><div>${r[2]?ttl(r[3]):''}</div></div>`).join('')}</div>
+  <div class="shelf"><div class="slot ${b?'':'dim'}" style="width:auto;min-width:120px">${b&&b.g!==undefined?jewSvg(b.g,b.type,b.metal,52):''}<div>${b?'最高傑作':'？？？'}</div><div>${b?b.name+'('+b.v.toLocaleString()+'G)':''}</div></div></div>
+  <div class="shelf">${GEMS.map((g,i)=>{const f=S.dex&&S.dex[i]!==undefined;return `<div class="slot ${f?'':'dim'}" style="width:44px">${gemSvg(g.c,30)}</div>`}).join('')}</div>
+  <div class="muted" style="text-align:center">図鑑 ${Object.keys(S.dex||{}).length}/${GEMS.length} — そろうほど部屋が豪華になるよ</div></div>`;
+}
+function vQuest(){
+  const st=S.quest.stage;
+  if(st===1)return questCard('tiara');
+  if(st===2)return questCard('crown');
+  let h=`<div class="card"><h3>👑 王室御用達</h3><div style="font-size:14px">女王のティアラ(品質${S.quest.tiaraQ})と、王の王冠(品質${S.quest.crownQ})を納めた。</div><button class="btn" style="margin-top:8px" onclick="showEnding(true)">エンディングをもう一度見る</button></div>`;
+  if(S.throne.stage===1)h+=questCard('throne');
+  else if(S.throne.stage===2)h+=`<div class="card"><h3>🏛 黄金の玉座</h3><div style="font-size:14px">修行の果てに、玉座を仕上げた(品質${S.throne.q})。</div><button class="btn" style="margin-top:8px" onclick="showEnding2(true)">もうひとつのエンディングを見る</button></div>`;
+  else h+=`<div class="card muted">ここから先は自由な時間。図鑑のコンプリート(強化タブ)や、もっと高価な宝石づくりを楽しもう。${S.diff===3&&!S.awake?'<br>修行で全部の強化をLv15にすると、何かが起こるかも…':''}</div>`;
+  return h+vHall();
+}
 function startRoyal(k){
-  if(!questReady()||(S.quest.stage===1?'tiara':'crown')!==k)return;
+  if(!questReady()||curQuestKey()!==k)return;
   ac();
-  PG={royal:k,r:{g:k==='tiara'?5:18,s:2},i:0,n:5,sc:[],t:0,last:performance.now(),half:polHalf()*0.85,done:false};
+  const Q=QUESTS[k];PG={royal:k,r:{g:k==='tiara'?5:18,s:2},i:0,n:Q.st,sc:[],t:0,last:performance.now(),half:polHalf()*Q.hf,done:false};
   newZone();
   const ov=document.getElementById('ov');ov.onclick=null;ov.classList.add('on');
   drawPG();PG.raf=requestAnimationFrame(loopPG);
@@ -665,12 +720,13 @@ function finishRoyal(){
   for(const r of Q.req){const ids=S.pol.filter(p=>r.g.includes(p.g)&&p.q>=r.q).sort((a,b)=>b.q-a.q).slice(0,r.n).map(p=>p.id);S.pol=S.pol.filter(p=>!ids.includes(p.id))}
   S.gold-=Q.cost;S.energy-=Q.e;
   const pay=Math.round(Q.cost*Q.reward);gain(pay);S.crafted=(S.crafted||0)+1;
-  S.quest[k+'Q']=q;S.quest.stage=(k==='tiara'?2:3);
+  if(k==='tiara'){S.quest.tiaraQ=q;S.quest.stage=2}else if(k==='crown'){S.quest.crownQ=q;S.quest.stage=3}else{S.throne={stage:2,q}}
   const ttl=q>=90?'傑作':q>=70?'名品':q>=40?'上出来':'及第';
   const pays=`<div style="margin:6px 0">報酬 <b style="color:var(--acc)">${pay.toLocaleString()}G</b>(制作費を引くと +${(pay-Q.cost).toLocaleString()}G)</div>`;
   SFX.rare(5);
   if(k==='tiara')showStory({ic:'👸',title:'女王のティアラ、完成!',paras:[`出来栄えは「${ttl}」(品質 ${q})。`,'ティアラを受け取った女王は、しばらく言葉もなく見つめ、それから静かに微笑んだ。「わたくしの髪に、星が降りてきたようね」','その噂を聞きつけて、王からも使者が来た。「王の王冠を、あなたに頼みたい」'],extra:pays,btn:'次の依頼へ',cb:()=>setTab('quest')});
-  else showStory({ic:'🤴',title:'王の王冠、完成!',paras:[`出来栄えは「${ttl}」(品質 ${q})。`,'戴冠式の日。王の頭上で、あなたの王冠が青く静かに輝いた。'],extra:pays,btn:'つづく',cb:()=>showEnding(false)});
+  else if(k==='crown')showStory({ic:'🤴',title:'王の王冠、完成!',paras:[`出来栄えは「${ttl}」(品質 ${q})。`,'戴冠式の日。王の頭上で、あなたの王冠が青く静かに輝いた。'],extra:pays,btn:'つづく',cb:()=>showEnding(false)});
+  else showStory({ic:'🏛',title:'黄金の玉座、完成!',paras:[`出来栄えは「${ttl}」(品質 ${q})。`,'玉座は王宮の広間の中央に据えられた。ピンクダイヤ、パライバ、ブルーダイヤ、パパラチア。四つの輝きが、星座のように並んで光る。','王は玉座に腰を下ろし、長いあいだ黙っていた。そして静かに言った。「これほどのものを作れる者は、もう他にいない」'],extra:pays,btn:'結末へ',cb:()=>showEnding2(false)});
   save();
 }
 function resultText(){
@@ -685,6 +741,15 @@ function showEnding(replay){
   const stats=`<div style="margin:10px 0;text-align:left;font-size:13px">${rows.map(r=>`<div class="row" style="padding:3px 0;border-bottom:1px solid var(--line)"><span class="muted">${r[0]}</span><span>${r[1]}</span></div>`).join('')}</div><button class="btn ghost" style="width:100%" onclick="copyResult()">📋 結果をコピー(SNS用)</button>`;
   showStory({ic:'👑',title:'エンディング — ありがとう、宝石職人さん',paras:['広間は息をのみ、やがて大きな拍手が響いた。岩山の小さな採掘から始まった工房は、いまや王国一の宝飾工房になった。','宝石は、掘る人、磨く人、飾る人、そして身につける人の想いがつながって、はじめて輝く。あなたの手が、そのすべてをつないだ。',replay?'':'ここから先は自由な時間。図鑑のコンプリートや、もっと高価な宝石づくりを、気がすむまで楽しんでね。'].filter(Boolean),extra:stats,btn:replay?'閉じる':'ゲームを続ける',cb:()=>{if(!replay){S.ending=true;S.clear=Math.max(S.clear===undefined?-1:S.clear,S.diff===undefined?1:S.diff);save();setTab('quest')}}});
   burst(document.getElementById('ov'),innerWidth/2,innerHeight/3,['#ffd35a','#fff','#ff9ad5','#7affc8','#7ab8ff'],80,{star:true,size:12,v:240,spread:Math.PI*2,dir:0,g:90,dur:1800});
+}
+function showEnding2(replay){
+  SFX.fanfare();
+  const rows=[['かかった日数',S.day+'日'],['総売上',Math.round(S.sold).toLocaleString()+' G'],['作った品',(S.crafted||0)+'個'],['玉座の出来栄え','品質 '+(S.throne?S.throne.q:0)],['最高傑作',S.best?S.best.name+'('+S.best.v.toLocaleString()+'G)':'—'],['図鑑',Object.keys(S.dex||{}).length+' / '+GEMS.length]];
+  const txt=`ジェムクラフト 修行モードで玉座まで完成!\n${S.day}日目 / 総売上 ${Math.round(S.sold).toLocaleString()}G / 作った品 ${S.crafted||0}個${S.best?' / 最高傑作 '+S.best.name+'('+S.best.v.toLocaleString()+'G)':''}\n#ジェムクラフト`;
+  window._res2=txt;
+  const stats=`<div style="margin:10px 0;text-align:left;font-size:13px">${rows.map(r=>`<div class="row" style="padding:3px 0;border-bottom:1px solid var(--line)"><span class="muted">${r[0]}</span><span>${r[1]}</span></div>`).join('')}</div><button class="btn ghost" style="width:100%" onclick="try{navigator.clipboard.writeText(window._res2).then(()=>toast('コピーしたよ')).catch(()=>toast('コピーできなかった…'))}catch(e){toast('コピーできなかった…')}">📋 結果をコピー(SNS用)</button>`;
+  showStory({ic:'🌟',title:'もうひとつのエンディング — 無双の工房',paras:['修行の末に極みへ至った工房は、王国の歴史に「黄金の工房」として刻まれた。','あなたが磨いた宝石は、これからも誰かの指で、胸元で、そして玉座で輝き続ける。道具に宿った魂も、きっとそれを見守っている。'],extra:stats,btn:replay?'閉じる':'ゲームを続ける',cb:()=>{if(!replay)setTab('quest')}});
+  burst(document.getElementById('ov'),innerWidth/2,innerHeight/3,['#ffd35a','#fff3b0','#ffb300','#fff','#ff9ad5','#7ab8ff'],100,{star:true,size:12,v:260,spread:Math.PI*2,dir:0,g:90,dur:1900});
 }
 function vDex(){
   const found=GEMS.filter((g,i)=>S.dex&&S.dex[i]!==undefined).length;
