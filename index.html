@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="岩山で採掘し、石を磨いて指輪やペンダントに加工、注文やオークションで売る宝石クラフトゲーム。">
+<meta name="description" content="岩山で採掘し、石を磨いて指輪やペンダントに加工、注文やオークションで売る宝石クラフトゲーム。 / A free gem-crafting browser game: mine, polish, craft and sell.">
 <meta name="theme-color" content="#1b1512">
-<meta property="og:title" content="ジェムクラフト">
-<meta property="og:description" content="採掘 → 研磨 → 加工 → 売却。宝石職人になろう。">
+<meta property="og:title" content="ジェムクラフト / Gem Craft">
+<meta property="og:description" content="採掘 → 研磨 → 加工 → 売却。宝石職人になろう。 / Mine → Polish → Craft → Sell. Become a gem artisan.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238fe3ff'/%3E%3Cstop offset='1' stop-color='%23b07cff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='%231b1512'/%3E%3Cpolygon points='32%2C9 52%2C24 32%2C56 12%2C24' fill='url%28%23g%29' stroke='%23fff' stroke-width='2' stroke-linejoin='round'/%3E%3Cpolygon points='32%2C9 52%2C24 12%2C24' fill='%23fff' fill-opacity='.4'/%3E%3Cpolygon points='32%2C56 12%2C24 32%2C24' fill='%23000' fill-opacity='.15'/%3E%3Ccircle cx='24' cy='19' r='2.5' fill='%23fff'/%3E%3C/svg%3E">
-<title>ジェムクラフト v3.4</title>
+<title>ジェムクラフト v3.5</title>
 <style>
 :root{--bg:#1b1512;--panel:#2a211c;--panel2:#34281f;--line:#4a3a2d;--ink:#f4e9dc;--sub:#b9a58f;--acc:#f0a24a;--good:#7fd18b;--bad:#e56b6b}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -31,6 +31,7 @@ nav button b{display:block;font-size:20px;font-weight:400}
 nav button.on{color:var(--acc)}
 nav.many button{font-size:10px}
 nav.many button b{font-size:18px}
+html[lang=en] .ja-only{display:none}
 body.awake{--acc:#ffd35a}
 body.awake header{background:linear-gradient(#4a3611,#1b1512);border-bottom-color:#b8892a}
 body.awake nav{border-top-color:#b8892a}
@@ -97,55 +98,74 @@ footer{padding:14px 14px 90px;text-align:center;font-size:11px;color:var(--sub)}
     <div class="bar"><i id="hBar"></i></div>
   </header>
   <main id="main"></main>
-  <footer>ジェムクラフト v3.4<br>Gem Craft © 2026 FILWEN<br>Planning &amp; Creative Direction: FILWEN<br>Developed with Claude (Anthropic)<br><span style="font-size:10px">本ゲームの宝石・通貨・オークションはすべて架空のものであり、現実の金銭取引はありません。<br>All gems, currency and auctions in this game are fictional. No real-money transactions are involved.</span><br><button class="btn sm ghost" style="margin-top:8px" onclick="resetAll()">最初からやり直す</button></footer>
+  <footer><span class="ja-only">ジェムクラフト </span>v3.5<br>Gem Craft © 2026 FILWEN<br>Planning &amp; Creative Direction: FILWEN<br>Developed with Claude (Anthropic)<br><span style="font-size:10px"><span class="ja-only">本ゲームの宝石・通貨・オークションはすべて架空のものであり、現実の金銭取引はありません。</span><br class="ja-only">All gems, currency and auctions in this game are fictional. No real-money transactions are involved.</span><br><button class="btn sm ghost" style="margin-top:8px" onclick="resetAll()">最初からやり直す</button> <button class="btn sm ghost" id="langBtn" style="margin-top:8px" onclick="toggleLang()"></button></footer>
 </div>
 <nav id="nav"></nav>
 <div id="toast"></div>
 <div id="ov"></div>
 
 <script>
+const LANG=(function(){try{const v=localStorage.getItem('filwen-gemcraft-lang');if(v==='ja'||v==='en')return v}catch(e){}return /^ja/i.test(navigator.language||'')?'ja':'en'})();
+document.documentElement.lang=LANG;
+const D={"水晶": "Quartz", "アメジスト": "Amethyst", "ガーネット": "Garnet", "サファイア": "Sapphire", "エメラルド": "Emerald", "ダイヤ": "Diamond", "ターコイズ": "Turquoise", "ムーンストーン": "Moonstone", "ペリドット": "Peridot", "オパール": "Opal", "トパーズ": "Topaz", "アクアマリン": "Aquamarine", "トルマリン": "Tourmaline", "ルビー": "Ruby", "タンザナイト": "Tanzanite", "アレキサンドライト": "Alexandrite", "ピンクダイヤ": "Pink Diamond", "パライバトルマリン": "Paraiba Tourmaline", "ブルーダイヤモンド": "Blue Diamond", "パパラチアサファイア": "Padparadscha Sapphire", "岩山の表層": "Rocky Surface", "表層": "Surface", "浅い坑道": "Shallow Tunnel", "深い坑道": "Deep Tunnel", "地底の晶洞": "Underground Geode", "星の核": "Star Core", "小": "Small", "中": "Medium", "大": "Large", "指輪": "Ring", "ペンダント": "Pendant", "ブレスレット": "Bracelet", "イヤリング": "Earrings", "{0}の{1}{2}": "{1} {0} {2}", "{0}の{1}": "{0} {1}", "{0}{1}": "{0} {1}", "{0}({1})": "{0} ({1})", "銀": "Silver", "金": "Gold", "プラチナ": "Platinum", "村娘のミナ": "Mina the Villager", "旅の商人": "Traveling Merchant", "貴族の若様": "Young Lord", "花嫁さん": "Bride-to-Be", "老職人": "Old Craftsman", "宿屋のおかみ": "Innkeeper", "魔法使い": "Wizard", "お姫さま": "Princess", "見習い採掘者": "Apprentice Miner", "駆け出し職人": "Novice Artisan", "一人前の宝飾師": "Journeyman Jeweler", "名工": "Master Craftsman", "宝飾王": "Jewelry King", "伝説の宝飾王": "Legendary Jewelry King", "やさしい": "Easy", "ふつう": "Normal", "むずかしい": "Hard", "修行": "Mastery", "岩の硬さ×{0} ／ 売値×{1} ／ 宿代・強化費用の目安×{2} ／ レア石の出やすさ×{3} ／ 維持費×{4}": "Rock hardness ×{0} / Sell price ×{1} / Inn & upgrade costs ×{2} / Rare gem chance ×{3} / Upkeep ×{4}", "極上": "Superb", "良": "Good", "並": "Fair", "粗": "Rough", "(次の称号まで売上あと {0}G)": " (next title: {0}G more in sales)", "(最高称号!)": " (top title!)", "{0}日目 ・ {1}": "Day {0} · {1}", "採掘": "Mine", "研磨": "Polish", "加工": "Craft", "注文": "Orders", "競売": "Auction", "売却": "Sell", "強化": "Upgrade", "王室": "Royal", "<div class=\"muted\">まだ何もないよ。掘ってみよう</div>": "<div class=\"muted\">Nothing yet. Go dig something up!</div>", "深いほど岩は硬いけど、いい石が出やすい。ツルハシLv{0}": "Deeper rocks are harder, but better gems show up. Earn Gold (G) by selling what you craft. Pickaxe Lv{0}", "原石袋": "Rough Gem Bag", "⛏ {0}を開放!": "⛏ {0} unlocked!", "⚡ 無双タイム発動中! 残り {0} 回(体力消費なし)": "⚡ Musou Time active! {0} hits left (no energy used)", "⚡ 無双タイムは本日使用済み(明日また)": "⚡ Musou Time already used today (back tomorrow)", "⚡ 無双タイム発動(1日1回・10回連打)": "⚡ Activate Musou Time (once a day · 10 hits)", "⚡ 無双タイム!岩を連打しよう": "⚡ Musou Time! Smash those rocks!", "体力がない…🌙 眠って回復しよう": "No energy left… 🌙 Get some sleep!", "✨ RARE! {0}の原石({1})": "✨ RARE! {0} rough ({1})", "💎 {0}の原石({1})を発掘!": "💎 Found {0} rough ({1})!", "{0}の原石({1})": "{0} rough ({1})", "タップで閉じる": "Tap to close", "{0}・磨く": "{0} · Polish", "<div class=\"muted\">原石がないよ。採掘へ⛏</div>": "<div class=\"muted\">No rough gems. Go mine some ⛏</div>", "{0}・{1}": "{0} · {1}", "<div class=\"muted\">まだないよ</div>": "<div class=\"muted\">None yet</div>", "✨ 研磨(体力3)": "✨ Polish (3 energy)", "原石を選んで、光る帯の中で「ストップ」を3回。ぴったりなほど品質アップ。研磨機Lv{0}": "Pick a rough gem and hit Stop inside the glowing band, 3 times. The closer to the center, the better the quality. Polisher Lv{0}", "原石": "Rough Gems", "磨いた宝石": "Polished Gems", "体力が足りない(3必要)": "Not enough energy (3 needed)", "{0}を仕上げ中": "Finishing {0}", "{0}({1})を研磨中": "Polishing {0} ({1})", "{0}点": "{0} pts", "{0} / {1} 回目 — 緑の帯でストップ!": "Attempt {0} / {1} — Stop in the green band!", "ストップ!": "Stop!", "品質 {0} — {1}": "Quality {0} — {1}", "{0}({1})の価値は ×{2}": "{0} ({1}) value ×{2}", "(ペア)": " (Pair)", "金属代 {0}G ／ 完成品の価値 約 {1}G": "Metal cost {0}G / Est. value ~{1}G", "加工する(体力2・{0}G)": "Craft (2 energy · {0}G)", "同じ宝石を2個選んでね({0}/2)。大きさがそろうとお得だよ": "Pick 2 of the same gem ({0}/2). Matching sizes are worth more!", "(同じ種類を2個)": " (2 of the same gem)", "<div class=\"muted\">磨いた宝石がないよ。研磨へ✨</div>": "<div class=\"muted\">No polished gems. Go polish some ✨</div>", "{0}・{1}・{2}G": "{0} · {1} · {2}G", "💍 加工": "💍 Craft", "磨いた宝石を選んで、形と金属を決めよう。作業台Lv{0}": "Pick polished gems, then choose a shape and a metal. Workbench Lv{0}", "① 宝石{0}": "① Gem{0}", "② 形": "② Shape", "③ 金属": "③ Metal", "完成品": "Finished Pieces", "✨ {0}が完成!": "✨ {0} complete!", "📜 お客さんの注文": "📜 Customer Orders", "条件に合う完成品を納めると、通常より高く買ってくれるよ。注文は毎朝増えて、期限が来ると消える。": "Deliver a piece that matches and they will pay more than usual. New orders arrive every morning and expire at their deadline.", "<div class=\"card muted\">今は注文がないよ。明日また来るかも</div>": "<div class=\"card muted\">No orders right now. Check back tomorrow!</div>", "品質は{0}以上でね": " Quality: {0} or better.", "「{0}をお願い!{1}」": "“{0}, please!{1}”", "宝石おまかせ": "Any gem", "金属おまかせ": "Any metal", "{0}以上": "{0} or better", "品質問わず": "Any quality", "<span class=\"dn\">今日まで!</span>": "<span class=\"dn\">Last day!</span>", "あと{0}日": "{0} days left", "納品 +{0}G": "Deliver +{0}G", "<div class=\"muted\" style=\"margin-top:8px\">条件に合う完成品がまだないよ</div>": "<div class=\"muted\" style=\"margin-top:8px\">No matching piece yet</div>", "{0} ／ 報酬: 価値×{1} + {2}G": "{0} / Reward: value ×{1} + {2}G", "{0} {1}「ありがとう!」 +{2}G": "{0} {1}: “Thank you!” +{2}G", "紳士コレクター": "Gentleman Collector", "異国の王女": "Foreign Princess", "海の商人": "Sea Merchant", "森の薬師": "Forest Herbalist", "砂漠の王": "Desert King", "結婚前の令嬢": "Bride-to-Be (Noble)", "道楽貴族": "Idle Aristocrat", "星読みの学者": "Stargazer Scholar", "大富豪": "Tycoon", "舞踏会の貴婦人": "Ballroom Lady", "・": ", ", "(お金持ち!)": " (wealthy!)", "絶好調🔥": "Booming 🔥", "好調": "Good", "低調": "Slow", "好みなし": "No match", "<div class=\"muted\">出品できる完成品がないよ。加工してこよう💍</div>": "<div class=\"muted\">No finished pieces to list. Go craft some 💍</div>", "今日の出品枠はおしまい。": "Today's listing slots are used up.", "出品できるのは開催日だけ。それまでに来場者の好みに合う品を作っておこう!": "You can only list on auction days. Prepare pieces that suit the guests!", "🎉 本日開催!(出品枠 残り{0})": "🎉 Auction today! ({0} slots left)", "次回: {0}日目(あと{1}日)": "Next: Day {0} ({1} days away)", "本日の来場者": "Today's Guests", "次回の来場者": "Next Guests", "予算 残り {0}G": "Budget left {0}G", "好み: {0}": "Likes: {0}", "前回: {0}": "Last: {0}", "🔨 オークション": "🔨 Auction", "3日に1回開催。来場者の好みに合う品は高値がつくよ。手数料 {0}%": "Held every 3 days. Pieces that suit the guests fetch high prices. Fee {0}%", "景気: {0}": "Market: {0}", "出品する": "List an Item", "{0} {1}Gで落札(手取り {2}G)": "{0} sold for {1}G (net {2}G)", "{0}は流札(買い手なし)": "{0} went unsold (no buyers)", "🪙 控えめ": "🪙 Modest", "まず売れる。高値は期待しにくい": "Likely to sell. Not a high price.", "⚖️ ふつう": "⚖️ Standard", "バランス型": "Balanced", "🔥 強気": "🔥 Bold", "好みの客がいないと流札しやすい": "May go unsold if no guest likes it", "、": ", ", "✨ {0}が好きそう!": "✨ {0} would love this!", "好みの来場者はいないかも…": "No guest here may fancy this…", "来場者の予算は最大で残り {0}G": "Highest guest budget left: {0}G", "予算オーバー": "Over budget", "価値の目安 {0}G ／ {1}": "Est. value {0}G / {1}", "開始価格を決めてね": "Choose a starting price", "やめる": "Cancel", "結果を見る": "See result", "🔨 落札! {0}{1}": "🔨 Sold! {0}{1}", "<div style=\"color:var(--acc);font-weight:800\">✨ 大高騰! ✨</div>": "<div style=\"color:var(--acc);font-weight:800\">✨ Bidding frenzy! ✨</div>", "{0}G − 手数料 {1}G =": "{0}G − fee {1}G =", "流札…誰も入札しなかった": "Unsold… nobody bid", "品物は手元に戻ったよ": "The piece came back to you.", "入札を待っています…": "Waiting for bids…", "価値の目安 {0}G": "Est. value {0}G", "女王のティアラ": "Queen's Tiara", "王宮の女王が、世界に二つとないティアラを望んでいる。プラチナの台座に、ダイヤとサファイアを並べ、中央に希少な一粒を。": "The Queen of the palace wants a tiara like no other. Set diamonds and sapphires on a platinum base, with one rare stone at the center.", "ピンクダイヤ か パパラチアサファイア": "Pink Diamond or Padparadscha Sapphire", "王の王冠": "King's Crown", "ティアラを見た王が、自らの王冠の仕立てを頼んできた。中心には、星の核の底に眠るという青い輝きを。": "After seeing the tiara, the King asks you to craft his own crown. At its heart: the blue glow said to sleep at the bottom of the Star Core.", "黄金の玉座": "Golden Throne", "王が望むのは、世界でいちばん希少な宝石を散りばめた黄金の玉座。修行を極めたあなたにしか、頼めない仕事。仕上げの帯はとても狭いよ。": "The King wants a golden throne studded with the rarest gems in the world. A job only someone who has mastered the Mastery path could take on. The finishing band is very narrow.", "王宮からの使者": "A Messenger from the Palace", "あなたの工房の評判は、いつのまにか王国じゅうに広まっていた。": "The fame of your workshop has quietly spread across the whole kingdom.", "ある朝、王宮の使者が訪ねてくる。「女王陛下が、世界に二つとないティアラを望んでおられます。引き受けていただければ、王室御用達の栄誉を」": "One morning, a messenger from the palace comes calling. “Her Majesty desires a tiara like no other. Accept, and the honor of Royal Warrant is yours.”", "依頼の詳しい内容は、新しく現れた「👑王室」タブで見られるよ。": "Details of the commission are in the new “👑 Royal” tab.", "工房の覚醒": "The Workshop Awakens", "ツルハシも、研磨機も、作業台も、すべてが極みに達した。修行の日々が、道具に魂を宿らせたのかもしれない。": "Your pickaxe, your polisher, your workbench — everything has reached its peak. Perhaps your days of hard training have given your tools a soul.", "金色の光が工房を包む。あなたは「無双の職人」と呼ばれるようになった。": "Golden light fills the workshop. You are now called the “Peerless Artisan.”", "ツルハシは金色に輝き、岩は金の粉をまいて砕ける。": "Your pickaxe shines gold, and rocks burst into golden dust.", "金色の工房へ": "Enter the Golden Workshop", "王からの最後の依頼": "The King's Final Request", "王冠を戴いた王が、再びあなたの工房を訪ねてきた。": "The King, crowned at last, visits your workshop once more.", "「余の隣に置く玉座を作ってほしい。世界でいちばん希少な宝石を使って、この国の誇りになるものを」": "“I want a throne to sit beside me. Use the rarest gems in the world, and make something this kingdom can be proud of.”", "超レアの宝石4種と、王国の名宝が必要になる。依頼の詳細は「👑王室」タブへ。": "You will need four ultra-rare gems and treasures of the kingdom. See the “👑 Royal” tab for details.", "({0}以上)": " ({0} or better)", "{0} 依頼: {1}": "{0} Commission: {1}", "必要なもの": "Requirements", "{0} 制作費 {1}G": "{0} Cost {1}G", "{0} 体力 {1}": "{0} Energy {1}", "使うのは磨いた宝石。納品すると、制作費の{0}%が報酬として戻ってくるよ。仕上げは{1}回勝負。": "Uses polished gems. When delivered, {0}% of the cost comes back as your reward. The finish takes {1} tries.", "特別な仕上げをはじめる": "Begin the Special Finish", "こじんまりした飾り棚": "A Cozy Display Shelf", "立派な飾り棚": "A Fine Display Cabinet", "小さなギャラリー": "A Small Gallery", "宝石の大広間": "The Great Gem Hall", "黄金の宝物殿": "The Golden Treasury", "傑作": "Masterpiece", "名品": "Fine Work", "上出来": "Well Done", "及第": "Passable", "？？？": "???", "最高傑作": "Finest Work", "🏛 宝物庫 — {0}": "🏛 Treasure Hall — {0}", "図鑑 {0}/{1} — そろうほど部屋が豪華になるよ": "Gem Index {0}/{1} — the more you collect, the grander the room", "👑 王室御用達": "👑 Royal Warrant", "女王のティアラ(品質{0})と、王の王冠(品質{1})を納めた。": "You delivered the Queen's Tiara (quality {0}) and the King's Crown (quality {1}).", "エンディングをもう一度見る": "Watch the ending again", "🏛 黄金の玉座": "🏛 Golden Throne", "修行の果てに、玉座を仕上げた(品質{0})。": "At the end of your training, you finished the throne (quality {0}).", "もうひとつのエンディングを見る": "Watch the other ending", "<br>修行で全部の強化をLv15にすると、何かが起こるかも…": "<br>Max out all six upgrades to Lv15 in Mastery mode, and something might happen…", "ここから先は自由な時間。図鑑のコンプリート(強化タブ)や、もっと高価な宝石づくりを楽しもう。{0}": "From here on, it is free time. Enjoy completing the Gem Index (Upgrade tab) and crafting even pricier gems.{0}", "報酬": "Reward", "(制作費を引くと +{0}G)": " (+{0}G after cost)", "女王のティアラ、完成!": "The Queen's Tiara, Complete!", "出来栄えは「{0}」(品質 {1})。": "The result: “{0}” (quality {1}).", "ティアラを受け取った女王は、しばらく言葉もなく見つめ、それから静かに微笑んだ。「わたくしの髪に、星が降りてきたようね」": "The Queen took the tiara and gazed at it in silence for a long while, then smiled softly. “It is as though stars have come down into my hair.”", "その噂を聞きつけて、王からも使者が来た。「王の王冠を、あなたに頼みたい」": "Word spread, and a messenger came from the King as well. “I would like you to make the King’s Crown.”", "次の依頼へ": "To the next commission", "王の王冠、完成!": "The King's Crown, Complete!", "戴冠式の日。王の頭上で、あなたの王冠が青く静かに輝いた。": "On coronation day, your crown shone a quiet blue above the King’s head.", "つづく": "To be continued", "黄金の玉座、完成!": "The Golden Throne, Complete!", "玉座は王宮の広間の中央に据えられた。ピンクダイヤ、パライバ、ブルーダイヤ、パパラチア。四つの輝きが、星座のように並んで光る。": "The throne was placed at the center of the palace hall. Pink Diamond, Paraiba, Blue Diamond, Padparadscha. Four brilliances shine side by side like a constellation.", "王は玉座に腰を下ろし、長いあいだ黙っていた。そして静かに言った。「これほどのものを作れる者は、もう他にいない」": "The King sat down on the throne and said nothing for a long time. Then, quietly: “There is no one else who could make such a thing.”", "結末へ": "To the ending", "/ 最高傑作 {0}({1}G)": " / Finest work {0} ({1}G)", "ジェムクラフト エンディング到達!\n難易度{0} / {1}日目 / 総売上 {2}G / 作った品 {3}個{4}\n#ジェムクラフト": "Reached the ending of Gem Craft!\nDifficulty: {0} / Day {1} / Total sales {2}G / Pieces crafted {3}{4}\n#GemCraft", "コピーしたよ": "Copied!", "コピーできなかった…": "Could not copy…", "かかった日数": "Days taken", "{0}日": "{0} days", "総売上": "Total sales", "作った品": "Pieces crafted", "{0}個": "{0}", "納めた注文": "Orders delivered", "{0}件": "{0}", "オークション落札": "Auction wins", "図鑑": "Gem Index", "難易度": "Difficulty", "{0}(クリア時)": "{0} (when cleared)", "📋 結果をコピー(SNS用)": "📋 Copy result (for social media)", "エンディング — ありがとう、宝石職人さん": "Ending — Thank You, Gem Artisan", "広間は息をのみ、やがて大きな拍手が響いた。岩山の小さな採掘から始まった工房は、いまや王国一の宝飾工房になった。": "The hall held its breath, and then great applause rang out. The workshop that began with small digs on a rocky mountain is now the finest jewelry workshop in the kingdom.", "宝石は、掘る人、磨く人、飾る人、そして身につける人の想いがつながって、はじめて輝く。あなたの手が、そのすべてをつないだ。": "A gem shines only when the hearts of those who dig, polish, set, and wear it are joined. Your hands joined them all.", "ここから先は自由な時間。図鑑のコンプリートや、もっと高価な宝石づくりを、気がすむまで楽しんでね。": "From here on, it is free time. Complete the Gem Index and craft even pricier gems to your heart’s content.", "閉じる": "Close", "ゲームを続ける": "Keep playing", "玉座の出来栄え": "Throne quality", "品質 {0}": "Quality {0}", "ジェムクラフト 修行モードで玉座まで完成!\n{0}日目 / 総売上 {1}G / 作った品 {2}個{3}\n#ジェムクラフト": "Finished the throne in Gem Craft’s Mastery mode!\nDay {0} / Total sales {1}G / Pieces crafted {2}{3}\n#GemCraft", "もうひとつのエンディング — 無双の工房": "Another Ending — The Peerless Workshop", "修行の末に極みへ至った工房は、王国の歴史に「黄金の工房」として刻まれた。": "The workshop that reached its peak through hard training was etched into the kingdom’s history as the “Golden Workshop.”", "あなたが磨いた宝石は、これからも誰かの指で、胸元で、そして玉座で輝き続ける。道具に宿った魂も、きっとそれを見守っている。": "The gems you polished will keep shining on someone’s finger, at someone’s neck, and on a throne. The soul that dwells in your tools is surely watching over them.", "<div style=\"height:32px;font-size:22px;opacity:.4\">？</div>": "<div style=\"height:32px;font-size:22px;opacity:.4\">?</div>", "最高 {0}": "Best: {0}", "原石のみ": "Rough only", "<div style=\"margin-top:6px;color:var(--acc)\">🎊 図鑑コンプリート!</div>": "<div style=\"margin-top:6px;color:var(--acc)\">🎊 Gem Index complete!</div>", "📖 宝石図鑑 {0} / {1}": "📖 Gem Index {0} / {1}", "<span class=\"up\">大人気🔥</span>": "<span class=\"up\">Hot 🔥</span>", "<span class=\"dn\">不人気</span>": "<span class=\"dn\">Unpopular</span>", "供給過多(同じ宝石を続けて売ると下がる。数日で戻る)": "Oversupply (price drops if you keep selling the same gem; recovers in a few days)", "📜 注文に合う完成品が{0}件あるよ。注文のほうが高く売れる!": "📜 You have {0} piece(s) that match an order. Orders pay more!", "売る {0}G": "Sell {0}G", "ぜんぶ売る({0}G)": "Sell all ({0}G)", "<div class=\"muted\">売るものがないよ</div>": "<div class=\"muted\">Nothing to sell</div>", "<div class=\"muted\">なし</div>": "<div class=\"muted\">None</div>", "💰 今日の需要": "💰 Today's Demand", "需要は毎朝変わるよ。人気の日に売るのがコツ": "Demand changes every morning. Sell on popular days!", "完成品を売る": "Sell Finished Pieces", "宝石のまま売る(6割)": "Sell Gems as They Are (60%)", "⛏ ツルハシ": "⛏ Pickaxe", "掘る威力アップ。レアな石も出やすくなる(Lv6・Lv11以降は伸びがゆるやか)": "More digging power, and rare gems appear more often (gains slow after Lv6 and Lv11)", "✨ 研磨機": "✨ Polisher", "緑の帯が広がって研磨が楽になる": "The green band widens, making polishing easier", "🔨 作業台": "🔨 Workbench", "完成品の価値が +10%/Lv(Lv11以降は+3%)": "Finished piece value +10% per Lv (+3% after Lv11)", "🎒 体力袋": "🎒 Energy Pouch", "最大体力が +5/Lv(Lv11以降は+2)": "Max energy +5 per Lv (+2 after Lv11)", "🔍 目利き": "🔍 Keen Eye", "注文の報酬 +5%/Lv、売却価格 +2%/Lv(Lv11以降は小さめ)": "Order rewards +5% per Lv, sell price +2% per Lv (smaller after Lv11)", "🧑‍🔧 弟子": "🧑‍🔧 Apprentice", "Lv2から雇用。毎朝、今いる層で原石を掘ってきてくれる(Lv2〜3:1個、Lv4〜5:2個…)": "Hired from Lv2. Digs rough gems every morning in your current layer (Lv2–3: 1 gem, Lv4–5: 2 gems…)", "クリア済みの最高難易度: ": "Highest cleared difficulty: ", "🎚 難易度": "🎚 Difficulty", "難易度: {0}": "Difficulty: {0}", "(未雇用)": " (not hired)", "「修行」は強化が進んだ上級者向け(最初からだと体力が足りなくなるよ)。途中でいつでも変えられる。{0}": "“Mastery” is for advanced players with upgraded gear (you will run out of energy if you start with it). You can change it any time. {0}", "鉱山の深い層は「採掘」タブで開放、体力は右上の宿屋で回復できるよ。納品した注文: {0}件": "Unlock deeper layers in the “Mine” tab; recover energy at the Inn (top right). Orders delivered: {0}", "強化した!": "Upgraded!", "🍞 パン": "🍞 Bread", "手軽に体力+8": "Quick bite: +8 energy", "🍱 定食": "🍱 Set Meal", "しっかり体力+20": "Hearty: +20 energy", "♨️ 温泉": "♨️ Hot Spring", "体力+15、今日は研磨の緑の帯が広がる": "+15 energy, and the green polishing band is wider today", "　♨️ほかほか中": "　♨️ Warmed up", "🏨 宿屋": "🏨 Inn", "今日の注文: {0}回 — 頼むほど値段が上がるよ(1回ごとに×1.7)。朝になるとリセット。": "Orders today: {0} — the more you order, the pricier it gets (×1.7 each time). Resets in the morning.", "{0} 体力 +{1}": "{0} Energy +{1}", "🌾 野宿": "🌾 Sleep Outside", "無料。体力は4割だけ回復": "Free. Recovers only 40% energy.", "🛏 安宿": "🛏 Cheap Inn", "体力が7.5割回復": "Recovers 75% energy", "🏰 上等な部屋": "🏰 Deluxe Room", "体力が全回復 + 翌日は研磨の緑の帯が広がる": "Full energy recovery + wider green polishing band tomorrow", "無料": "Free", "→ 体力 {0} / {1}": "→ Energy {0} / {1}", "🌙 どこで眠る?": "🌙 Where to sleep?", "体力は残りに足される(最大まで)。称号が上がると宿代も上がるよ。": "Energy is added to what you have left (up to the max). Inn prices rise as your title does.", "今夜の維持費(工房・税金): {0}G": "Tonight's upkeep (workshop & taxes): {0}G", "🌙 {0}日目の朝。新しい注文も届いたよ": "🌙 Morning of Day {0}. New orders have arrived!", "🏠 維持費 -{0}G": "🏠 Upkeep -{0}G", "\n🔨 今日はオークションの開催日!": "\n🔨 Auction day today!", "🧑‍🔧 弟子が原石を{0}個掘ってきたよ": "🧑‍🔧 Your apprentice dug up {0} rough gem(s)!", "(いい石も混じってる!)": " (some good ones too!)", "セーブデータを消して最初からやり直す?": "Delete your save data and start over?", "やり直す": "Start over", "🍙 宿屋": "🍙 Inn", "🌙 眠る": "🌙 Sleep", "⚡ 体力": "⚡ Energy", "最初からやり直す": "Start over", "このゲームはJavaScriptが必要です。": "This game requires JavaScript.", "ジェムクラフト": "Gem Craft", "岩山で採掘し、石を磨いて指輪やペンダントに加工、注文やオークションで売る宝石クラフトゲーム。": "A gem-crafting game: mine rocky mountains, polish stones, craft rings and pendants, and sell them through orders and auctions.", "採掘 → 研磨 → 加工 → 売却。宝石職人になろう。": "Mine → Polish → Craft → Sell. Become a gem artisan.", "本ゲームの宝石・通貨・オークションはすべて架空のものであり、現実の金銭取引はありません。": "", "ジェムクラフト v3.5": "Gem Craft v3.4"};
+const R={};for(const k in D)if(D[k]&&!/\{\d+\}/.test(k))R[D[k]]=k;
+function L(s){return LANG==='en'?(D[s]!==undefined?D[s]:s):(R[s]!==undefined?R[s]:s)}
+function L2(k,p){const t=(LANG==='en'&&D[k]!==undefined)?D[k]:k;return t.replace(/\{(\d+)\}/g,(m,n)=>p[n]!==undefined?p[n]:'')}
+(function(){
+  const lb=document.getElementById('langBtn');if(lb)lb.textContent=LANG==='en'?'🌐 日本語':'🌐 English';
+  if(LANG!=='en')return;
+  document.title=D['ジェムクラフト v3.5'];
+  const md=document.querySelector('meta[name=description]');if(md)md.setAttribute('content','A free gem-crafting browser game: mine rocky mountains, polish stones, craft rings and pendants, and sell them through orders and auctions.');
+  const ot=document.querySelector('meta[property="og:title"]');if(ot)ot.setAttribute('content','Gem Craft');
+  const od=document.querySelector('meta[property="og:description"]');if(od)od.setAttribute('content','Mine → Polish → Craft → Sell. Become a gem artisan.');
+  const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);const ns=[];while(w.nextNode())ns.push(w.currentNode);
+  ns.forEach(n=>{if(n.parentNode&&n.parentNode.tagName==='SCRIPT')return;const t=n.nodeValue.trim();if(t&&D[t]!==undefined){n.nodeValue=n.nodeValue.replace(t,D[t])}});
+})();
+
 const GEMS=[
- {n:'水晶',c:'#dfe9f3',fx:'#dfe9f3',v:12,r:0},
- {n:'アメジスト',c:'#9b6bd1',fx:'#9b6bd1',v:35,r:0},
- {n:'ガーネット',c:'#c0304a',fx:'#c0304a',v:70,r:0},
- {n:'サファイア',c:'#2f6fd6',fx:'#2f6fd6',v:140,r:2},
- {n:'エメラルド',c:'#27a869',fx:'#27a869',v:240,r:3},
- {n:'ダイヤ',c:'#bfefff',fx:'#bfefff',v:400,r:4},
- {n:'ターコイズ',c:'#3fb8b0',fx:'#3fb8b0',v:20,r:0},
- {n:'ムーンストーン',c:'#b9c8f0',fx:'#b9c8f0',v:28,r:0},
- {n:'ペリドット',c:'#a5d63f',fx:'#a5d63f',v:45,r:0},
- {n:'オパール',c:'rainbow',fx:'#ffb3e6',v:90,r:1},
- {n:'トパーズ',c:'#f0a23c',fx:'#f0a23c',v:85,r:1},
- {n:'アクアマリン',c:'#7fd9e8',fx:'#7fd9e8',v:110,r:1},
- {n:'トルマリン',c:'#d8527f',fx:'#d8527f',v:100,r:1},
- {n:'ルビー',c:'#d6203c',fx:'#d6203c',v:200,r:2},
- {n:'タンザナイト',c:'#5a4fcf',fx:'#7a6fff',v:180,r:2},
- {n:'アレキサンドライト',c:'alex',fx:'#3fcf8f',v:320,r:3},
- {n:'ピンクダイヤ',c:'#ff8fc8',fx:'#ff8fc8',v:900,r:5},
- {n:'パライバトルマリン',c:'#19e6d8',fx:'#19e6d8',v:700,r:5},
- {n:'ブルーダイヤモンド',c:'#3aa0ff',fx:'#5ab8ff',v:1500,r:5},
- {n:'パパラチアサファイア',c:'#ff9a72',fx:'#ffa27a',v:800,r:5}
+ {n:L("水晶"),c:'#dfe9f3',fx:'#dfe9f3',v:12,r:0},
+ {n:L("アメジスト"),c:'#9b6bd1',fx:'#9b6bd1',v:35,r:0},
+ {n:L("ガーネット"),c:'#c0304a',fx:'#c0304a',v:70,r:0},
+ {n:L("サファイア"),c:'#2f6fd6',fx:'#2f6fd6',v:140,r:2},
+ {n:L("エメラルド"),c:'#27a869',fx:'#27a869',v:240,r:3},
+ {n:L("ダイヤ"),c:'#bfefff',fx:'#bfefff',v:400,r:4},
+ {n:L("ターコイズ"),c:'#3fb8b0',fx:'#3fb8b0',v:20,r:0},
+ {n:L("ムーンストーン"),c:'#b9c8f0',fx:'#b9c8f0',v:28,r:0},
+ {n:L("ペリドット"),c:'#a5d63f',fx:'#a5d63f',v:45,r:0},
+ {n:L("オパール"),c:'rainbow',fx:'#ffb3e6',v:90,r:1},
+ {n:L("トパーズ"),c:'#f0a23c',fx:'#f0a23c',v:85,r:1},
+ {n:L("アクアマリン"),c:'#7fd9e8',fx:'#7fd9e8',v:110,r:1},
+ {n:L("トルマリン"),c:'#d8527f',fx:'#d8527f',v:100,r:1},
+ {n:L("ルビー"),c:'#d6203c',fx:'#d6203c',v:200,r:2},
+ {n:L("タンザナイト"),c:'#5a4fcf',fx:'#7a6fff',v:180,r:2},
+ {n:L("アレキサンドライト"),c:'alex',fx:'#3fcf8f',v:320,r:3},
+ {n:L("ピンクダイヤ"),c:'#ff8fc8',fx:'#ff8fc8',v:900,r:5},
+ {n:L("パライバトルマリン"),c:'#19e6d8',fx:'#19e6d8',v:700,r:5},
+ {n:L("ブルーダイヤモンド"),c:'#3aa0ff',fx:'#5ab8ff',v:1500,r:5},
+ {n:L("パパラチアサファイア"),c:'#ff9a72',fx:'#ffa27a',v:800,r:5}
 ];
 const RN=['','','RARE','SUPER RARE','LEGENDARY','MYTHIC'];
 const DEPTHS=[
- {n:'岩山の表層',s:'表層',hp:6,cost:0,w:[30,14,6,1,0,0,22,14,11,2,0,0,0,0,0,0,0,0,0,0],bg:['#85735f','#6b5b4d','#554638'],vein:'#9b6bd144'},
- {n:'浅い坑道',s:'浅い坑道',hp:9,cost:250,w:[12,18,14,5,2,0,8,7,9,8,8,6,3,0,0,0,0,0,0,0],bg:['#8a8c94','#686a72','#4e5058'],vein:'#6fa8dc77'},
- {n:'深い坑道',s:'深い坑道',hp:13,cost:900,w:[3,7,10,11,8,1,2,2,3,7,10,10,8,8,6,4,0,0,0,0],bg:['#6f7a9a','#4f5877','#394059'],vein:'#7fe0c088'},
- {n:'地底の晶洞',s:'地底の晶洞',hp:18,cost:2800,w:[0,2,5,9,12,6,0,0,1,3,5,6,6,13,11,12,3,2,1,1],bg:['#8a64ab','#654a82','#483463'],vein:'#e0a8ffaa'},
- {n:'星の核',s:'星の核',hp:26,cost:12000,w:[0,0,3,8,10,10,0,0,0,2,4,5,6,12,10,13,3,3,1,2],bg:['#4a6fb0','#34508a','#213563'],vein:'#8ad0ffcc'}
+ {n:L("岩山の表層"),s:L("表層"),hp:6,cost:0,w:[30,14,6,1,0,0,22,14,11,2,0,0,0,0,0,0,0,0,0,0],bg:['#85735f','#6b5b4d','#554638'],vein:'#9b6bd144'},
+ {n:L("浅い坑道"),s:L("浅い坑道"),hp:9,cost:250,w:[12,18,14,5,2,0,8,7,9,8,8,6,3,0,0,0,0,0,0,0],bg:['#8a8c94','#686a72','#4e5058'],vein:'#6fa8dc77'},
+ {n:L("深い坑道"),s:L("深い坑道"),hp:13,cost:900,w:[3,7,10,11,8,1,2,2,3,7,10,10,8,8,6,4,0,0,0,0],bg:['#6f7a9a','#4f5877','#394059'],vein:'#7fe0c088'},
+ {n:L("地底の晶洞"),s:L("地底の晶洞"),hp:18,cost:2800,w:[0,2,5,9,12,6,0,0,1,3,5,6,6,13,11,12,3,2,1,1],bg:['#8a64ab','#654a82','#483463'],vein:'#e0a8ffaa'},
+ {n:L("星の核"),s:L("星の核"),hp:26,cost:12000,w:[0,0,3,8,10,10,0,0,0,2,4,5,6,12,10,13,3,3,1,2],bg:['#4a6fb0','#34508a','#213563'],vein:'#8ad0ffcc'}
 ];
-const SZ=['小','中','大'], SM=[1,2.2,4];
+const SZ=[L("小"),L("中"),L("大")], SM=[1,2.2,4];
 const TY={
- ring:{n:'指輪',m:1.3,cost:{silver:15,gold:60,platinum:140}},
- pendant:{n:'ペンダント',m:1.2,cost:{silver:20,gold:80,platinum:190}},
- bracelet:{n:'ブレスレット',m:1.6,cost:{silver:35,gold:140,platinum:330}},
- earring:{n:'イヤリング',m:1.3,cost:{silver:30,gold:120,platinum:280}}
+ ring:{n:L("指輪"),m:1.3,cost:{silver:15,gold:60,platinum:140}},
+ pendant:{n:L("ペンダント"),m:1.2,cost:{silver:20,gold:80,platinum:190}},
+ bracelet:{n:L("ブレスレット"),m:1.6,cost:{silver:35,gold:140,platinum:330}},
+ earring:{n:L("イヤリング"),m:1.3,cost:{silver:30,gold:120,platinum:280}}
 };
-const MT={silver:{n:'銀',c:'#d6dbe2',gm:1},gold:{n:'金',c:'#f2c14e',gm:1.05},platinum:{n:'プラチナ',c:'#e3f0ff',gm:1.12}};
-const CLIENTS=[['👧','村娘のミナ'],['🧳','旅の商人'],['🤴','貴族の若様'],['👰','花嫁さん'],['👴','老職人'],['👵','宿屋のおかみ'],['🧙','魔法使い'],['👸','お姫さま']];
+const jN=(g,t)=>L2('{0}{1}',[GEMS[g].n,TY[t].n]);
+const fullName=(g,m,t)=>L2(L("{0}の{1}{2}"),[GEMS[g].n,MT[m].n,TY[t].n]);
+const MT={silver:{n:L("銀"),c:'#d6dbe2',gm:1},gold:{n:L("金"),c:'#f2c14e',gm:1.05},platinum:{n:L("プラチナ"),c:'#e3f0ff',gm:1.12}};
+const CLIENTS=[['👧',L("村娘のミナ")],['🧳',L("旅の商人")],['🤴',L("貴族の若様")],['👰',L("花嫁さん")],['👴',L("老職人")],['👵',L("宿屋のおかみ")],['🧙',L("魔法使い")],['👸',L("お姫さま")]];
 const UP=[150,400,900,2000,4000,7500,13000,22000,38000,65000,110000,180000,300000,480000];
 const MAXLV=15;
-const RANKS=[[0,'見習い採掘者'],[500,'駆け出し職人'],[3000,'一人前の宝飾師'],[10000,'名工'],[30000,'宝飾王'],[100000,'伝説の宝飾王']];
+const RANKS=[[0,L("見習い採掘者")],[500,L("駆け出し職人")],[3000,L("一人前の宝飾師")],[10000,L("名工")],[30000,L("宝飾王")],[100000,L("伝説の宝飾王")]];
 const BASEE=30;
 const maxE=()=>{const b=S.bag||1;return BASEE+(b<=10?5*(b-1):45+2*(b-10))};
 const pickPow=()=>S.pick<=5?S.pick:S.pick<=10?5+(S.pick-5)*0.5:7.5+(S.pick-10)*0.25;
@@ -154,13 +174,13 @@ const benchMul=()=>S.bench<=10?1+0.1*(S.bench-1):1.9+0.03*(S.bench-10);
 const eyeO=()=>S.eye<=10?0.05*(S.eye-1):0.45+0.02*(S.eye-10);
 const eyeS=()=>1+(S.eye<=10?0.02*(S.eye-1):0.18+0.01*(S.eye-10));
 const DIFFS=[
- {n:'やさしい',hp:.8,sell:1.1,cost:.7,rare:1.2,up:.5},
- {n:'ふつう',hp:1,sell:1,cost:1,rare:1,up:1},
- {n:'むずかしい',hp:1.5,sell:.8,cost:1.5,rare:.7,up:1.5},
- {n:'修行',hp:2,sell:.65,cost:2,rare:.5,up:2.5}
+ {n:L("やさしい"),hp:.8,sell:1.1,cost:.7,rare:1.2,up:.5},
+ {n:L("ふつう"),hp:1,sell:1,cost:1,rare:1,up:1},
+ {n:L("むずかしい"),hp:1.5,sell:.8,cost:1.5,rare:.7,up:1.5},
+ {n:L("修行"),hp:2,sell:.65,cost:2,rare:.5,up:2.5}
 ];
 const DF=()=>DIFFS[S.diff===undefined?1:S.diff];
-const diffText=d=>`岩の硬さ×${d.hp} ／ 売値×${d.sell} ／ 宿代・強化費用の目安×${d.cost} ／ レア石の出やすさ×${d.rare} ／ 維持費×${d.up}`;
+const diffText=d=>`${L2("岩の硬さ×{0} ／ 売値×{1} ／ 宿代・強化費用の目安×{2} ／ レア石の出やすさ×{3} ／ 維持費×{4}",[d.hp,d.sell,d.cost,d.rare,d.up])}`;
 const upMul=()=>1+(DF().cost-1)*0.5;
 const UPK=[0,5,20,60,150,400];
 const upkeep=()=>Math.round(((UPK[rankIdx()]||0)+Math.floor(S.gold*0.0003))*DF().up);
@@ -168,7 +188,7 @@ const satMult=g=>Math.max(0.45,1-0.05*((S.sat&&S.sat[g])||0));
 function satBump(g){if(!S.sat)S.sat={};S.sat[g]=(S.sat[g]||0)+1}
 function satDecay(){for(const k in S.sat){S.sat[k]*=0.6;if(S.sat[k]<0.3)delete S.sat[k]}}
 const qMult=q=>0.5+1.5*q/100;
-const grade=q=>q>=90?'極上':q>=70?'良':q>=40?'並':'粗';
+const grade=q=>q>=90?L("極上"):q>=70?L("良"):q>=40?L("並"):L("粗");
 const gemVal=(g,sz,q)=>GEMS[g].v*SM[sz]*qMult(q);
 const ia=(g,x='')=>`class="item ${GEMS[g].r>=2?'rare':''} ${x}" style="--gc:${GEMS[g].fx}"`;
 
@@ -178,6 +198,7 @@ let S=null;
 try{S=JSON.parse(localStorage.getItem('filwen-gemcraft-save'))}catch(e){}
 if(!S||typeof S.gold!=='number')S=S0();
 else{const d=S0();for(const k in d)if(S[k]===undefined)S[k]=d[k];if(S.dem&&S.dem.earring===undefined)S.dem.earring=1}
+(function(){if(S.orders)S.orders.forEach(o=>{if(o.who)o.who=L(o.who)});if(S.aucBudget){const nb={};for(const k in S.aucBudget)nb[L(k)]=S.aucBudget[k];S.aucBudget=nb}if(S.best&&typeof S.best.name==='string')S.best.name=L(S.best.name)})();
 function save(){try{localStorage.setItem('filwen-gemcraft-save',JSON.stringify(S))}catch(e){}}
 let craft={sel:[],type:'ring',metal:'silver'};
 
@@ -254,21 +275,26 @@ const PICK_SVG=`<svg width="70" height="130" viewBox="0 0 70 130"><line x1="35" 
 
 const PICK_GOLD=PICK_SVG.replace('#9a6a35','#8a5a1b').replace('#c9d0da','#ffd35a').replace('#fff','#fff6c8');
 /* ---------- UI core ---------- */
+function bestName(b){return b.g!==undefined&&b.type&&b.metal&&MT[b.metal]&&TY[b.type]?fullName(b.g,b.metal,b.type):L(b.name)}
+function aucLastText(){const a=S.aucLast;if(!a)return '';if(typeof a==='string')return L(a);
+  return a.s?`${L2("{0} {1}Gで落札(手取り {2}G)",[jN2(a),a.p.toLocaleString(),a.n.toLocaleString()])}`:`${L2("{0}は流札(買い手なし)",[jN2(a)])}`}
+const jN2=a=>L2(L("{0}の{1}"),[GEMS[a.g].n,TY[a.t].n]);
+function toggleLang(){try{localStorage.setItem('filwen-gemcraft-lang',LANG==='en'?'ja':'en')}catch(e){}save();location.reload()}
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1900)}
 function rank(){let r=RANKS[0];for(const x of RANKS)if(S.sold>=x[0])r=x;return r}
 function nextRank(){for(const x of RANKS)if(S.sold<x[0])return x;return null}
 function header(){
   document.getElementById('hGold').textContent='💰 '+Math.round(S.gold).toLocaleString()+' G';
   const nr=nextRank();
-  document.getElementById('hRank').textContent=(S.awake?'✨ ':'')+(S.throne&&S.throne.stage===2?'🏛 ':'')+(S.ending?'👑 ':'')+(S.clear===3?'🏅 ':'')+rank()[1]+(nr?`(次の称号まで売上あと ${(nr[0]-S.sold).toLocaleString()}G)`:'(最高称号!)');
-  document.getElementById('hDay').textContent=S.day+'日目 ・ '+DF().n;
+  document.getElementById('hRank').textContent=(S.awake?'✨ ':'')+(S.throne&&S.throne.stage===2?'🏛 ':'')+(S.ending?'👑 ':'')+(S.clear===3?'🏅 ':'')+rank()[1]+(nr?`${L2("(次の称号まで売上あと {0}G)",[(nr[0]-S.sold).toLocaleString()])}`:L("(最高称号!)"));
+  document.getElementById('hDay').textContent=`${L2("{0}日目 ・ {1}",[S.day,DF().n])}`;
   document.getElementById('hEn').textContent=S.energy+' / '+maxE();
   document.getElementById('hBar').style.width=(S.energy/maxE()*100)+'%';
   document.getElementById('hSnd').textContent=S.snd?'🔊':'🔇';
 }
-const TABS=[['mine','⛏','採掘'],['polish','✨','研磨'],['craft','💍','加工'],['order','📜','注文'],['auc','🔨','競売'],['sell','💰','売却'],['shop','🔧','強化']];
+const TABS=[['mine','⛏',L("採掘")],['polish','✨',L("研磨")],['craft','💍',L("加工")],['order','📜',L("注文")],['auc','🔨',L("競売")],['sell','💰',L("売却")],['shop','🔧',L("強化")]];
 function setTab(t){S.tab=t;render()}
-function tabList(){return S.quest.stage>=1?TABS.concat([['quest','👑','王室']]):TABS}
+function tabList(){return S.quest.stage>=1?TABS.concat([['quest','👑',L("王室")]]):TABS}
 const allMax=()=>['pick','wheel','bench','bag','eye','app'].every(k=>S[k]>=MAXLV);
 function awakeCheck(){if(!S.awake&&S.diff===3&&allMax()){S.awake=true;S.awakeNew=true}}
 function throneCheck(){if(S.awake&&S.ending&&S.throne&&S.throne.stage===0){S.throne.stage=1;S.throneNew=true}}
@@ -288,7 +314,7 @@ function render(){
 /* ---------- Mine ---------- */
 function newRock(){const hp=Math.max(1,Math.round(DEPTHS[S.depth].hp*DF().hp));S.rock={hp,max:hp}}
 function chances(){const w=DEPTHS[S.depth].w.map((x,i)=>x*Math.min(2.2,1+0.08*(S.pick-1)*GEMS[i].r)*(GEMS[i].r>=2?DF().rare:1));const t=w.reduce((a,b)=>a+b,0);return w.map(x=>x/t)}
-function bagHtml(){return S.rough.length?`<div class="grid">${S.rough.map(r=>`<div ${ia(r.g)}>${gemSvg(GEMS[r.g].c,40,true)}<div>${GEMS[r.g].n}</div><small>${SZ[r.s]}</small></div>`).join('')}</div>`:'<div class="muted">まだ何もないよ。掘ってみよう</div>'}
+function bagHtml(){return S.rough.length?`<div class="grid">${S.rough.map(r=>`<div ${ia(r.g)}>${gemSvg(GEMS[r.g].c,40,true)}<div>${GEMS[r.g].n}</div><small>${SZ[r.s]}</small></div>`).join('')}</div>`:L("<div class=\"muted\">まだ何もないよ。掘ってみよう</div>")}
 function vMine(){
   if(!S.rock)newRock();
   const ch=chances();
@@ -296,16 +322,16 @@ function vMine(){
     const open=i<=S.maxDepth,buy=i===S.maxDepth+1;
     const lbl=open?d.s:(buy?`🔒${d.s} ${d.cost}G`:`🔒${d.s}`);
     return `<button class="btn ${S.depth===i?'':'ghost'}" ${(!open&&(!buy||S.gold<d.cost))?'disabled':''} onclick="goDepth(${i})">${lbl}</button>`}).join('');
-  return `<div class="card"><h3>⛏ ${DEPTHS[S.depth].n}</h3><div class="muted">深いほど岩は硬いけど、いい石が出やすい。ツルハシLv${S.pick}</div>
+  return `<div class="card"><h3>⛏ ${DEPTHS[S.depth].n}</h3><div class="muted">${L2("深いほど岩は硬いけど、いい石が出やすい。ツルハシLv{0}",[S.pick])}</div>
   <div class="opts g2" style="margin-top:8px">${dbtn}</div>
   ${S.awake?`<div id="muBox" style="text-align:center;margin-top:8px">${muHtml()}</div>`:''}
   <div id="stage" onclick="mine()"><div id="rockwrap">${rockSvg(S.rock.hp/S.rock.max)}</div><div id="pick">${S.awake?PICK_GOLD:PICK_SVG}</div><div id="fx"></div></div>
   <div style="text-align:center">${ch.map((p,i)=>p>0?`<span class="pill">${GEMS[i].n} ${Math.max(1,Math.round(p*100))}%</span>`:'').join('')}</div></div>
-  <div class="card"><h3>原石袋</h3><div id="bag">${bagHtml()}</div></div>`;
+  <div class="card"><h3>${L("原石袋")}</h3><div id="bag">${bagHtml()}</div></div>`;
 }
 function goDepth(i){
   if(i<=S.maxDepth){S.depth=i;newRock();render()}
-  else if(i===S.maxDepth+1&&S.gold>=DEPTHS[i].cost){S.gold-=DEPTHS[i].cost;S.maxDepth=i;S.depth=i;newRock();SFX.buy();toast('⛏ '+DEPTHS[i].n+'を開放!');render()}
+  else if(i===S.maxDepth+1&&S.gold>=DEPTHS[i].cost){S.gold-=DEPTHS[i].cost;S.maxDepth=i;S.depth=i;newRock();SFX.buy();toast(`${L2("⛏ {0}を開放!",[DEPTHS[i].n])}`);render()}
 }
 function pickGem(){
   const ws=chances();let t=Math.random();
@@ -319,18 +345,18 @@ function swing(){
 }
 function muOn(){return !!(S.awake&&S.mu&&S.mu.n>0)}
 function muHtml(){
-  if(muOn())return `<div class="gold" style="font-weight:800">⚡ 無双タイム発動中! 残り ${S.mu.n} 回(体力消費なし)</div>`;
-  if(S.mu.day===S.day)return `<button class="btn ghost" disabled>⚡ 無双タイムは本日使用済み(明日また)</button>`;
-  return `<button class="btn" style="width:100%" onclick="muStart()">⚡ 無双タイム発動(1日1回・10回連打)</button>`;
+  if(muOn())return `<div class="gold" style="font-weight:800">${L2("⚡ 無双タイム発動中! 残り {0} 回(体力消費なし)",[S.mu.n])}</div>`;
+  if(S.mu.day===S.day)return `<button class="btn ghost" disabled>${L("⚡ 無双タイムは本日使用済み(明日また)")}</button>`;
+  return `<button class="btn" style="width:100%" onclick="muStart()">${L("⚡ 無双タイム発動(1日1回・10回連打)")}</button>`;
 }
 function muUI(){const b=document.getElementById('muBox');if(b)b.innerHTML=muHtml()}
 function muStart(){
   if(!S.awake||muOn()||S.mu.day===S.day)return;
-  ac();S.mu={day:S.day,n:10};save();SFX.rare(2);toast('⚡ 無双タイム!岩を連打しよう');muUI();
+  ac();S.mu={day:S.day,n:10};save();SFX.rare(2);toast(L("⚡ 無双タイム!岩を連打しよう"));muUI();
 }
 function mine(){
   const mu=muOn();
-  if(!mu&&S.energy<=0){SFX.err();toast('体力がない…🌙 眠って回復しよう');return}
+  if(!mu&&S.energy<=0){SFX.err();toast(L("体力がない…🌙 眠って回復しよう"));return}
   ac();
   if(mu){S.mu.n--;S.rock.hp=0}else{S.energy--;S.rock.hp-=pickPow()}
   let drop=null;
@@ -366,12 +392,12 @@ function impact(drop,mu){
   const g=drop.g,gm=GEMS[g],c=gm.fx,t=gm.r;
   if(t>=3){showReveal(g,drop.s)}
   else if(t===2){
-    SFX.rare(2);toast(`✨ RARE! ${gm.n}の原石(${SZ[drop.s]})`);
+    SFX.rare(2);toast(`${L2("✨ RARE! {0}の原石({1})",[gm.n,SZ[drop.s]])}`);
     burst(box,130,110,[c,'#fff',c,'#ffffffaa'],24,{star:true,size:11,v:130,spread:Math.PI*2,dir:0,g:30,dur:1000});
     if(box){const fl=document.createElement('div');fl.style.cssText=`position:absolute;inset:-30px;background:radial-gradient(circle,${c}cc,transparent 65%);pointer-events:none`;box.appendChild(fl);fl.animate([{opacity:0},{opacity:1,offset:.25},{opacity:0}],{duration:800}).onfinish=()=>fl.remove();
       const bn=document.createElement('div');bn.textContent='✨ RARE ✨';bn.style.cssText=`position:absolute;left:0;right:0;top:0;text-align:center;font-weight:800;letter-spacing:.15em;color:#fff;text-shadow:0 0 10px ${c},0 0 20px ${c}`;box.appendChild(bn);bn.animate([{transform:'translateY(14px)',opacity:0},{transform:'translateY(0)',opacity:1,offset:.25},{transform:'translateY(-6px)',opacity:1,offset:.75},{transform:'translateY(-14px)',opacity:0}],{duration:1400}).onfinish=()=>bn.remove()}
   }else{
-    SFX.found(t);toast(`💎 ${gm.n}の原石(${SZ[drop.s]})を発掘!`);
+    SFX.found(t);toast(`${L2("💎 {0}の原石({1})を発掘!",[gm.n,SZ[drop.s]])}`);
     burst(box,130,110,[c,'#fff'],8,{star:true,size:8,v:70,spread:Math.PI*2,dir:0,g:20,dur:700});
   }
 }
@@ -379,7 +405,7 @@ let revealOn=false,revealT=null;
 function showReveal(g,s){
   const ov=document.getElementById('ov'),gm=GEMS[g],c=gm.fx,t=gm.r,leg=t>=4;
   revealOn=true;ov.classList.add('on');ov.onclick=closeReveal;
-  ov.innerHTML=`<div class="reveal" style="--gc:${c}"><div class="rays"></div><div class="gbig">${gemSvg(gm.c,150,true)}</div><div class="rt">${RN[t]}</div><div class="rn">${gm.n}の原石(${SZ[s]})</div><div class="muted" style="margin-top:12px;position:relative">タップで閉じる</div></div>`;
+  ov.innerHTML=`<div class="reveal" style="--gc:${c}"><div class="rays"></div><div class="gbig">${gemSvg(gm.c,150,true)}</div><div class="rt">${RN[t]}</div><div class="rn">${L2("{0}の原石({1})",[gm.n,SZ[s]])}</div><div class="muted" style="margin-top:12px;position:relative">${L("タップで閉じる")}</div></div>`;
   burst(ov,innerWidth/2,innerHeight/2-60,[c,'#fff','#ffe38a'],t>=5?90:leg?70:40,{star:true,size:13,v:220,spread:Math.PI*2,dir:0,g:90,dur:1500});
   if(t>=5)setTimeout(()=>burst(ov,innerWidth/2,innerHeight/2-60,[c,'#fff','#ffe38a','#ff9ad5','#7affc8'],70,{star:true,size:11,v:260,spread:Math.PI*2,dir:0,g:100,dur:1700}),700);
   SFX.rare(t);
@@ -389,13 +415,13 @@ function closeReveal(){if(!revealOn)return;clearTimeout(revealT);closeOv()}
 
 /* ---------- Polish ---------- */
 function vPolish(){
-  return `<div class="card"><h3>✨ 研磨(体力3)</h3><div class="muted">原石を選んで、光る帯の中で「ストップ」を3回。ぴったりなほど品質アップ。研磨機Lv${S.wheel}</div></div>
-  <div class="card"><h3>原石</h3>${S.rough.length?`<div class="grid">${S.rough.map(r=>`<button ${ia(r.g)} onclick="startPolish(${r.id})">${gemSvg(GEMS[r.g].c,40,true)}<div>${GEMS[r.g].n}</div><small>${SZ[r.s]}・磨く</small></button>`).join('')}</div>`:'<div class="muted">原石がないよ。採掘へ⛏</div>'}</div>
-  <div class="card"><h3>磨いた宝石</h3>${S.pol.length?`<div class="grid">${S.pol.map(p=>`<div ${ia(p.g)}>${gemSvg(GEMS[p.g].c,40)}<div>${GEMS[p.g].n}</div><small>${SZ[p.s]}・${grade(p.q)}</small></div>`).join('')}</div>`:'<div class="muted">まだないよ</div>'}</div>`;
+  return `<div class="card"><h3>${L("✨ 研磨(体力3)")}</h3><div class="muted">${L2("原石を選んで、光る帯の中で「ストップ」を3回。ぴったりなほど品質アップ。研磨機Lv{0}",[S.wheel])}</div></div>
+  <div class="card"><h3>${L("原石")}</h3>${S.rough.length?`<div class="grid">${S.rough.map(r=>`<button ${ia(r.g)} onclick="startPolish(${r.id})">${gemSvg(GEMS[r.g].c,40,true)}<div>${GEMS[r.g].n}</div><small>${L2("{0}・磨く",[SZ[r.s]])}</small></button>`).join('')}</div>`:L("<div class=\"muted\">原石がないよ。採掘へ⛏</div>")}</div>
+  <div class="card"><h3>${L("磨いた宝石")}</h3>${S.pol.length?`<div class="grid">${S.pol.map(p=>`<div ${ia(p.g)}>${gemSvg(GEMS[p.g].c,40)}<div>${GEMS[p.g].n}</div><small>${L2("{0}・{1}",[SZ[p.s],grade(p.q)])}</small></div>`).join('')}</div>`:L("<div class=\"muted\">まだないよ</div>")}</div>`;
 }
 let PG=null;
 function startPolish(id){
-  if(S.energy<3){SFX.err();toast('体力が足りない(3必要)');return}
+  if(S.energy<3){SFX.err();toast(L("体力が足りない(3必要)"));return}
   const r=S.rough.find(x=>x.id===id);if(!r)return;
   ac();S.energy-=3;header();
   PG={id,r,i:0,n:3,sc:[],t:0,last:performance.now(),half:polHalf(),done:false};
@@ -407,10 +433,10 @@ function startPolish(id){
 function newZone(){PG.c=22+Math.random()*56;PG.sp=2+(PG.r.s*0.4)+PG.i*0.35}
 function drawPG(){
   const ov=document.getElementById('ov');
-  ov.innerHTML=`<div class="modal"><div>${PG.royal?royalSvg(PG.royal,64):gemSvg(GEMS[PG.r.g].c,64,true)}</div><div style="font-weight:700">${PG.royal?QUESTS[PG.royal].n+'を仕上げ中':GEMS[PG.r.g].n+'('+SZ[PG.r.s]+')を研磨中'}</div><div class="muted">${PG.i+1} / ${PG.n} 回目 — 緑の帯でストップ!</div>
+  ov.innerHTML=`<div class="modal"><div>${PG.royal?royalSvg(PG.royal,64):gemSvg(GEMS[PG.r.g].c,64,true)}</div><div style="font-weight:700">${PG.royal?`${L2("{0}を仕上げ中",[QUESTS[PG.royal].n])}`:`${L2("{0}({1})を研磨中",[GEMS[PG.r.g].n,SZ[PG.r.s]])}`}</div><div class="muted">${L2("{0} / {1} 回目 — 緑の帯でストップ!",[PG.i+1,PG.n])}</div>
   <div class="track"><div class="zone" style="left:${PG.c-PG.half}%;width:${PG.half*2}%"></div><div class="mk" id="mk"></div></div>
-  <button class="btn" style="width:100%;font-size:18px;padding:14px" onclick="stopPG()">ストップ!</button>
-  <div class="muted" style="margin-top:8px">${PG.sc.map(s=>`<span class="pill">${Math.round(s)}点</span>`).join('')}</div></div>`;
+  <button class="btn" style="width:100%;font-size:18px;padding:14px" onclick="stopPG()">${L("ストップ!")}</button>
+  <div class="muted" style="margin-top:8px">${PG.sc.map(s=>`<span class="pill">${L2("{0}点",[Math.round(s)])}</span>`).join('')}</div></div>`;
 }
 function loopPG(now){
   if(!PG||PG.done)return;
@@ -434,7 +460,7 @@ function finishPG(){
   S.rough=S.rough.filter(x=>x.id!==PG.id);
   S.pol.push({id:PG.r.id,g:PG.r.g,s:PG.r.s,q});
   const ov=document.getElementById('ov'),c=GEMS[PG.r.g].fx;
-  ov.innerHTML=`<div class="modal"><div>${gemSvg(c,90)}</div><div style="font-size:20px;font-weight:700;margin:6px 0">品質 ${q} — ${grade(q)}</div><div class="muted">${GEMS[PG.r.g].n}(${SZ[PG.r.s]})の価値は ×${qMult(q).toFixed(2)}</div><button class="btn" style="margin-top:14px" onclick="closeOv()">OK</button></div>`;
+  ov.innerHTML=`<div class="modal"><div>${gemSvg(c,90)}</div><div style="font-size:20px;font-weight:700;margin:6px 0">${L2("品質 {0} — {1}",[q,grade(q)])}</div><div class="muted">${L2("{0}({1})の価値は ×{2}",[GEMS[PG.r.g].n,SZ[PG.r.s],qMult(q).toFixed(2)])}</div><button class="btn" style="margin-top:14px" onclick="closeOv()">OK</button></div>`;
   setTimeout(()=>{SFX.done(q);if(q>=90)burst(ov,innerWidth/2,innerHeight/2-40,[c,'#fff','#ffe38a'],34,{star:true,size:11,v:170,spread:Math.PI*2,dir:0,g:60,dur:1200})},350);
   PG=null;save();
 }
@@ -467,14 +493,14 @@ function vCraft(){
   let prev='';
   if(ready){
     const v=jewVal(gemPartOf(gs,craft.type),craft.type,craft.metal);
-    prev=`<div style="text-align:center;margin:8px 0">${jewSvg(gs[0].g,craft.type,craft.metal,72)}<div>${GEMS[gs[0].g].n}の${MT[craft.metal].n}${TY[craft.type].n}${ear?'(ペア)':''}</div><div class="muted">金属代 ${cost}G ／ 完成品の価値 約 ${v}G</div></div>
-    <button class="btn" style="width:100%" ${(S.gold<cost||S.energy<2)?'disabled':''} onclick="doCraft()">加工する(体力2・${cost}G)</button>`;
-  }else if(ear)prev=`<div class="muted" style="margin:8px 0">同じ宝石を2個選んでね(${gs.length}/2)。大きさがそろうとお得だよ</div>`;
-  return `<div class="card"><h3>💍 加工</h3><div class="muted">磨いた宝石を選んで、形と金属を決めよう。作業台Lv${S.bench}</div></div>
-  <div class="card"><h3>① 宝石${ear?'(同じ種類を2個)':''}</h3>${S.pol.length?`<div class="grid">${S.pol.map(p=>`<button ${ia(p.g,craft.sel.includes(p.id)?'sel':'')} onclick="pickCraft(${p.id})">${gemSvg(GEMS[p.g].c,36)}<div>${GEMS[p.g].n}</div><small>${SZ[p.s]}・${grade(p.q)}</small></button>`).join('')}</div>`:'<div class="muted">磨いた宝石がないよ。研磨へ✨</div>'}</div>
-  <div class="card"><h3>② 形</h3><div class="opts g2">${Object.keys(TY).map(k=>`<button class="btn ${craft.type===k?'':'ghost'}" onclick="setType('${k}')">${TY[k].n}</button>`).join('')}</div>
-  <h3 style="margin-top:10px">③ 金属</h3><div class="opts">${Object.keys(MT).map(k=>`<button class="btn ${craft.metal===k?'':'ghost'}" onclick="craft.metal='${k}';render()">${MT[k].n}<br><span style="font-weight:400;font-size:11px">${TY[craft.type].cost[k]}G</span></button>`).join('')}</div>${prev}</div>
-  <div class="card"><h3>完成品</h3>${S.jew.length?`<div class="grid">${S.jew.map(j=>`<div ${ia(j.g)}>${jewSvg(j.g,j.type,j.metal,40)}<div>${GEMS[j.g].n}${TY[j.type].n}</div><small>${MT[j.metal].n}・${grade(j.q)}・${j.value}G</small></div>`).join('')}</div>`:'<div class="muted">まだないよ</div>'}</div>`;
+    prev=`<div style="text-align:center;margin:8px 0">${jewSvg(gs[0].g,craft.type,craft.metal,72)}<div>${fullName(gs[0].g,craft.metal,craft.type)}${ear?L("(ペア)"):''}</div><div class="muted">${L2("金属代 {0}G ／ 完成品の価値 約 {1}G",[cost,v])}</div></div>
+    <button class="btn" style="width:100%" ${(S.gold<cost||S.energy<2)?'disabled':''} onclick="doCraft()">${L2("加工する(体力2・{0}G)",[cost])}</button>`;
+  }else if(ear)prev=`<div class="muted" style="margin:8px 0">${L2("同じ宝石を2個選んでね({0}/2)。大きさがそろうとお得だよ",[gs.length])}</div>`;
+  return `<div class="card"><h3>${L("💍 加工")}</h3><div class="muted">${L2("磨いた宝石を選んで、形と金属を決めよう。作業台Lv{0}",[S.bench])}</div></div>
+  <div class="card"><h3>${L2("① 宝石{0}",[ear?L("(同じ種類を2個)"):''])}</h3>${S.pol.length?`<div class="grid">${S.pol.map(p=>`<button ${ia(p.g,craft.sel.includes(p.id)?'sel':'')} onclick="pickCraft(${p.id})">${gemSvg(GEMS[p.g].c,36)}<div>${GEMS[p.g].n}</div><small>${L2("{0}・{1}",[SZ[p.s],grade(p.q)])}</small></button>`).join('')}</div>`:L("<div class=\"muted\">磨いた宝石がないよ。研磨へ✨</div>")}</div>
+  <div class="card"><h3>${L("② 形")}</h3><div class="opts g2">${Object.keys(TY).map(k=>`<button class="btn ${craft.type===k?'':'ghost'}" onclick="setType('${k}')">${TY[k].n}</button>`).join('')}</div>
+  <h3 style="margin-top:10px">${L("③ 金属")}</h3><div class="opts">${Object.keys(MT).map(k=>`<button class="btn ${craft.metal===k?'':'ghost'}" onclick="craft.metal='${k}';render()">${MT[k].n}<br><span style="font-weight:400;font-size:11px">${TY[craft.type].cost[k]}G</span></button>`).join('')}</div>${prev}</div>
+  <div class="card"><h3>${L("完成品")}</h3>${S.jew.length?`<div class="grid">${S.jew.map(j=>`<div ${ia(j.g)}>${jewSvg(j.g,j.type,j.metal,40)}<div>${jN(j.g,j.type)}</div><small>${L2("{0}・{1}・{2}G",[MT[j.metal].n,grade(j.q),j.value])}</small></div>`).join('')}</div>`:L("<div class=\"muted\">まだないよ</div>")}</div>`;
 }
 function doCraft(){
   const gs=selGems(),ear=craft.type==='earring';
@@ -487,9 +513,9 @@ function doCraft(){
   const q=Math.round(gs.reduce((a,g)=>a+g.q,0)/gs.length),sz=Math.max(...gs.map(g=>g.s));
   S.jew.push({id:gs[0].id,g:gs[0].g,s:sz,q,type:craft.type,metal:craft.metal,value:v,pair:ear});
   S.crafted=(S.crafted||0)+1;
-  const nm=`${GEMS[gs[0].g].n}の${MT[craft.metal].n}${TY[craft.type].n}`;
+  const nm=fullName(gs[0].g,craft.metal,craft.type);
   if(!S.best||v>S.best.v)S.best={v,name:nm,g:gs[0].g,type:craft.type,metal:craft.metal};
-  craft.sel=[];SFX.craft();toast('✨ '+nm+'が完成!');render();
+  craft.sel=[];SFX.craft();toast(`${L2("✨ {0}が完成!",[nm])}`);render();
 }
 
 /* ---------- Orders ---------- */
@@ -523,38 +549,39 @@ const match=(o,j)=>j.type===o.type&&(o.g===null||j.g===o.g)&&j.q>=o.minQ&&(!o.me
 const reward=(o,j)=>Math.round(j.value*o.mult*(1+eyeO())*DF().sell)+o.tip;
 function fulfillable(){return S.orders.filter(o=>S.jew.some(j=>match(o,j))).length}
 function vOrder(){
-  const head=`<div class="card"><h3>📜 お客さんの注文</h3><div class="muted">条件に合う完成品を納めると、通常より高く買ってくれるよ。注文は毎朝増えて、期限が来ると消える。</div></div>`;
-  if(!S.orders.length)return head+'<div class="card muted">今は注文がないよ。明日また来るかも</div>';
+  const head=`<div class="card"><h3>${L("📜 お客さんの注文")}</h3><div class="muted">${L("条件に合う完成品を納めると、通常より高く買ってくれるよ。注文は毎朝増えて、期限が来ると消える。")}</div></div>`;
+  if(!S.orders.length)return head+L("<div class=\"card muted\">今は注文がないよ。明日また来るかも</div>");
   return head+S.orders.map(o=>{
     const left=o.due-S.day;
     const ms=S.jew.filter(j=>match(o,j));
-    const q=`「${o.g!==null?GEMS[o.g].n+'の':''}${TY[o.type].n}${o.metal?'('+MT[o.metal].n+')':''}をお願い!${o.minQ?`品質は${grade(o.minQ)}以上でね`:''}」`;
+    const what0=o.g!==null?L2(L("{0}の{1}"),[GEMS[o.g].n,TY[o.type].n]):TY[o.type].n,what=o.metal?L2('{0}({1})',[what0,MT[o.metal].n]):what0;
+    const q=`${L2("「{0}をお願い!{1}」",[what,o.minQ?`${L2("品質は{0}以上でね",[grade(o.minQ)])}`:''])}`;
     return `<div class="card"><div class="oc"><div class="face">${o.ic}</div><div style="flex:1"><div style="font-weight:700">${o.who}</div><div style="font-size:13px;margin:2px 0">${q}</div>
-    <div><span class="pill">${o.g!==null?GEMS[o.g].n:'宝石おまかせ'}</span><span class="pill">${TY[o.type].n}</span><span class="pill">${o.metal?MT[o.metal].n:'金属おまかせ'}</span><span class="pill">${o.minQ?grade(o.minQ)+'以上':'品質問わず'}</span></div>
-    <div class="muted" style="margin-top:4px">${left<=0?'<span class="dn">今日まで!</span>':'あと'+left+'日'} ／ 報酬: 価値×${o.mult.toFixed(2)} + ${o.tip}G</div></div></div>
-    ${ms.length?`<div class="grid" style="margin-top:8px">${ms.map(j=>`<button ${ia(j.g)} onclick="deliver(${o.id},${j.id})">${jewSvg(j.g,j.type,j.metal,40)}<div>${GEMS[j.g].n}${TY[j.type].n}</div><small>納品 +${reward(o,j)}G</small></button>`).join('')}</div>`:'<div class="muted" style="margin-top:8px">条件に合う完成品がまだないよ</div>'}</div>`}).join('');
+    <div><span class="pill">${o.g!==null?GEMS[o.g].n:L("宝石おまかせ")}</span><span class="pill">${TY[o.type].n}</span><span class="pill">${o.metal?MT[o.metal].n:L("金属おまかせ")}</span><span class="pill">${o.minQ?`${L2("{0}以上",[grade(o.minQ)])}`:L("品質問わず")}</span></div>
+    <div class="muted" style="margin-top:4px">${L2("{0} ／ 報酬: 価値×{1} + {2}G",[left<=0?L("<span class=\"dn\">今日まで!</span>"):`${L2("あと{0}日",[left])}`,o.mult.toFixed(2),o.tip])}</div></div></div>
+    ${ms.length?`<div class="grid" style="margin-top:8px">${ms.map(j=>`<button ${ia(j.g)} onclick="deliver(${o.id},${j.id})">${jewSvg(j.g,j.type,j.metal,40)}<div>${jN(j.g,j.type)}</div><small>${L2("納品 +{0}G",[reward(o,j)])}</small></button>`).join('')}</div>`:L("<div class=\"muted\" style=\"margin-top:8px\">条件に合う完成品がまだないよ</div>")}</div>`}).join('');
 }
 function deliver(oid,jid){
   const o=S.orders.find(x=>x.id===oid),j=S.jew.find(x=>x.id===jid);
   if(!o||!j||!match(o,j))return;
   const pay=reward(o,j);
   S.jew=S.jew.filter(x=>x.id!==jid);S.orders=S.orders.filter(x=>x.id!==oid);gain(pay);S.served++;
-  SFX.order();toast(`${o.ic} ${o.who}「ありがとう!」 +${pay}G`);render();
+  SFX.order();toast(`${L2("{0} {1}「ありがとう!」 +{2}G",[o.ic,o.who,pay])}`);render();
 }
 
 /* ---------- Auction ---------- */
 const GUESTS=[
- {ic:'🎩',n:'紳士コレクター',fg:[13,3],ft:null,rich:1.2},
- {ic:'👸',n:'異国の王女',fg:[5,16,18],ft:null,rich:1.5},
- {ic:'🧙',n:'魔法使い',fg:[15,14,7],ft:null,rich:1.1},
- {ic:'🌊',n:'海の商人',fg:[11,6,9],ft:null,rich:1.1},
- {ic:'🌿',n:'森の薬師',fg:[4,8,12],ft:null,rich:1.0},
- {ic:'🏜',n:'砂漠の王',fg:[10,2,13],ft:null,rich:1.4},
- {ic:'👰',n:'結婚前の令嬢',fg:[5],ft:'ring',rich:1.2},
- {ic:'🎭',n:'道楽貴族',fg:[],ft:'pendant',rich:1.3},
- {ic:'🔭',n:'星読みの学者',fg:[7,3,1,17],ft:null,rich:1.0},
- {ic:'💰',n:'大富豪',fg:[16,17,5,18,19],ft:'bracelet',rich:1.6},
- {ic:'💃',n:'舞踏会の貴婦人',fg:[5,13,19],ft:'earring',rich:1.3}
+ {ic:'🎩',n:L("紳士コレクター"),fg:[13,3],ft:null,rich:1.2},
+ {ic:'👸',n:L("異国の王女"),fg:[5,16,18],ft:null,rich:1.5},
+ {ic:'🧙',n:L("魔法使い"),fg:[15,14,7],ft:null,rich:1.1},
+ {ic:'🌊',n:L("海の商人"),fg:[11,6,9],ft:null,rich:1.1},
+ {ic:'🌿',n:L("森の薬師"),fg:[4,8,12],ft:null,rich:1.0},
+ {ic:'🏜',n:L("砂漠の王"),fg:[10,2,13],ft:null,rich:1.4},
+ {ic:'👰',n:L("結婚前の令嬢"),fg:[5],ft:'ring',rich:1.2},
+ {ic:'🎭',n:L("道楽貴族"),fg:[],ft:'pendant',rich:1.3},
+ {ic:'🔭',n:L("星読みの学者"),fg:[7,3,1,17],ft:null,rich:1.0},
+ {ic:'💰',n:L("大富豪"),fg:[16,17,5,18,19],ft:'bracelet',rich:1.6},
+ {ic:'💃',n:L("舞踏会の貴婦人"),fg:[5,13,19],ft:'earring',rich:1.3}
 ];
 function rng(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)|0;let t=Math.imul(a^a>>>15,1|a);t=(t+Math.imul(t^t>>>7,61|t))^t;return((t^t>>>14)>>>0)/4294967296}}
 const aucDayFor=d=>Math.ceil(d/3)*3;
@@ -568,18 +595,18 @@ const aucBudgetBase=g=>Math.round(6000*g.rich*(1+0.8*rankIdx())/100)*100;
 function ensureSlots(){if(S.day%3===0&&S.aucDay!==S.day){S.aucDay=S.day;S.aucSlots=3;S.aucBudget={};aucGuests(S.day).guests.forEach(g=>{S.aucBudget[g.n]=aucBudgetBase(g)})}}
 function aucReady(){ensureSlots();return S.day%3===0&&S.aucSlots>0&&S.jew.length>0}
 const favored=(g,j)=>g.fg.includes(j.g)||g.ft===j.type;
-const favText=g=>[...g.fg.map(i=>GEMS[i].n),...(g.ft?[TY[g.ft].n]:[])].join('・')+(g.rich>=1.4?'(お金持ち!)':'');
+const favText=g=>[...g.fg.map(i=>GEMS[i].n),...(g.ft?[TY[g.ft].n]:[])].join(L("・"))+(g.rich>=1.4?L("(お金持ち!)"):'');
 function vAuc(){
   ensureSlots();
   const isDay=S.day%3===0,D=aucDayFor(S.day),{guests,mood}=aucGuests(D);
-  const ml=mood>=1.2?'絶好調🔥':mood>=1.1?'好調':mood>=1?'ふつう':'低調';
+  const ml=mood>=1.2?L("絶好調🔥"):mood>=1.1?L("好調"):mood>=1?L("ふつう"):L("低調");
   const items=isDay&&S.aucSlots>0
-    ?(S.jew.length?`<div class="grid">${S.jew.map(j=>{const m=guests.filter(g=>favored(g,j));return `<button ${ia(j.g)} onclick="openLot(${j.id})">${jewSvg(j.g,j.type,j.metal,40)}<div>${GEMS[j.g].n}${TY[j.type].n}</div><small>${m.length?'♥ '+m.map(g=>g.ic).join(''):'好みなし'}</small></button>`}).join('')}</div>`:'<div class="muted">出品できる完成品がないよ。加工してこよう💍</div>')
-    :`<div class="muted">${isDay?'今日の出品枠はおしまい。':'出品できるのは開催日だけ。それまでに来場者の好みに合う品を作っておこう!'}</div>`;
-  return `<div class="card"><h3>🔨 オークション</h3><div class="muted">3日に1回開催。来場者の好みに合う品は高値がつくよ。手数料 ${Math.round(aucFee()*1000)/10}%</div>
-  <div style="margin-top:6px;font-weight:700">${isDay?'🎉 本日開催!(出品枠 残り'+S.aucSlots+')':'次回: '+D+'日目(あと'+(D-S.day)+'日)'}</div><div class="muted">景気: ${ml}</div></div>
-  <div class="card"><h3>${isDay?'本日の来場者':'次回の来場者'}</h3>${guests.map(g=>`<div class="oc" style="margin-bottom:6px"><div class="face" style="font-size:26px">${g.ic}</div><div><b>${g.n}</b><div class="muted">好み: ${favText(g)}</div>${isDay&&S.aucBudget&&S.aucBudget[g.n]!==undefined?`<div class="muted">予算 残り ${S.aucBudget[g.n].toLocaleString()}G</div>`:''}</div></div>`).join('')}</div>
-  <div class="card"><h3>出品する</h3>${items}${S.aucLast?`<div class="muted" style="margin-top:8px">前回: ${S.aucLast}</div>`:''}</div>`;
+    ?(S.jew.length?`<div class="grid">${S.jew.map(j=>{const m=guests.filter(g=>favored(g,j));return `<button ${ia(j.g)} onclick="openLot(${j.id})">${jewSvg(j.g,j.type,j.metal,40)}<div>${jN(j.g,j.type)}</div><small>${m.length?'♥ '+m.map(g=>g.ic).join(''):L("好みなし")}</small></button>`}).join('')}</div>`:L("<div class=\"muted\">出品できる完成品がないよ。加工してこよう💍</div>"))
+    :`<div class="muted">${isDay?L("今日の出品枠はおしまい。"):L("出品できるのは開催日だけ。それまでに来場者の好みに合う品を作っておこう!")}</div>`;
+  return `<div class="card"><h3>${L("🔨 オークション")}</h3><div class="muted">${L2("3日に1回開催。来場者の好みに合う品は高値がつくよ。手数料 {0}%",[Math.round(aucFee()*1000)/10])}</div>
+  <div style="margin-top:6px;font-weight:700">${isDay?`${L2("🎉 本日開催!(出品枠 残り{0})",[S.aucSlots])}`:`${L2("次回: {0}日目(あと{1}日)",[D,D-S.day])}`}</div><div class="muted">${L2("景気: {0}",[ml])}</div></div>
+  <div class="card"><h3>${isDay?L("本日の来場者"):L("次回の来場者")}</h3>${guests.map(g=>`<div class="oc" style="margin-bottom:6px"><div class="face" style="font-size:26px">${g.ic}</div><div><b>${g.n}</b><div class="muted">${L2("好み: {0}",[favText(g)])}</div>${isDay&&S.aucBudget&&S.aucBudget[g.n]!==undefined?`<div class="muted">${L2("予算 残り {0}G",[S.aucBudget[g.n].toLocaleString()])}</div>`:''}</div></div>`).join('')}</div>
+  <div class="card"><h3>${L("出品する")}</h3>${items}${S.aucLast?`<div class="muted" style="margin-top:8px">${L2("前回: {0}",[aucLastText()])}</div>`:''}</div>`;
 }
 function openLot(jid){
   ensureSlots();
@@ -587,12 +614,12 @@ function openLot(jid){
   const {guests}=aucGuests(aucDayFor(S.day)),m=guests.filter(g=>favored(g,j));
   const ov=document.getElementById('ov');ov.onclick=null;ov.classList.add('on');
   const maxBud=Math.max(...guests.map(g=>(S.aucBudget&&S.aucBudget[g.n]!==undefined)?S.aucBudget[g.n]:Infinity));
-  const opts=[['🪙 控えめ',.6,'まず売れる。高値は期待しにくい'],['⚖️ ふつう',1.1,'バランス型'],['🔥 強気',1.8,'好みの客がいないと流札しやすい']];
-  ov.innerHTML=`<div class="modal"><div>${jewSvg(j.g,j.type,j.metal,72)}</div><div style="font-weight:700">${GEMS[j.g].n}の${MT[j.metal].n}${TY[j.type].n}</div><div class="muted">価値の目安 ${j.value}G ／ ${grade(j.q)}</div>
-  <div style="margin:8px 0;font-size:13px">${m.length?'✨ '+m.map(g=>g.ic+g.n).join('、')+'が好きそう!':'好みの来場者はいないかも…'}</div>
-  <div class="muted" style="margin-bottom:6px">開始価格を決めてね</div>
-  ${isFinite(maxBud)?`<div class="muted" style="margin-bottom:6px">来場者の予算は最大で残り ${maxBud.toLocaleString()}G</div>`:''}${opts.map(o=>`<button class="btn ${o[1]===1.1?'':'ghost'}" ${Math.round(j.value*o[1])>maxBud?'disabled':''} style="width:100%;margin-bottom:6px" onclick="startLot(${j.id},${o[1]})">${o[0]} ${Math.round(j.value*o[1]).toLocaleString()}G<span style="font-weight:400;font-size:11px"> — ${Math.round(j.value*o[1])>maxBud?'予算オーバー':o[2]}</span></button>`).join('')}
-  <button class="btn ghost" style="width:100%" onclick="closeOv()">やめる</button></div>`;
+  const opts=[[L("🪙 控えめ"),.6,L("まず売れる。高値は期待しにくい")],[L("⚖️ ふつう"),1.1,L("バランス型")],[L("🔥 強気"),1.8,L("好みの客がいないと流札しやすい")]];
+  ov.innerHTML=`<div class="modal"><div>${jewSvg(j.g,j.type,j.metal,72)}</div><div style="font-weight:700">${fullName(j.g,j.metal,j.type)}</div><div class="muted">${L2("価値の目安 {0}G ／ {1}",[j.value,grade(j.q)])}</div>
+  <div style="margin:8px 0;font-size:13px">${m.length?`${L2("✨ {0}が好きそう!",[m.map(g=>g.ic+g.n).join(L("、"))])}`:L("好みの来場者はいないかも…")}</div>
+  <div class="muted" style="margin-bottom:6px">${L("開始価格を決めてね")}</div>
+  ${isFinite(maxBud)?`<div class="muted" style="margin-bottom:6px">${L2("来場者の予算は最大で残り {0}G",[maxBud.toLocaleString()])}</div>`:''}${opts.map(o=>`<button class="btn ${o[1]===1.1?'':'ghost'}" ${Math.round(j.value*o[1])>maxBud?'disabled':''} style="width:100%;margin-bottom:6px" onclick="startLot(${j.id},${o[1]})">${o[0]} ${Math.round(j.value*o[1]).toLocaleString()}G<span style="font-weight:400;font-size:11px"> — ${Math.round(j.value*o[1])>maxBud?L("予算オーバー"):o[2]}</span></button>`).join('')}
+  <button class="btn ghost" style="width:100%" onclick="closeOv()">${L("やめる")}</button></div>`;
 }
 function wpick(arr){const t=arr.reduce((a,b)=>a+b.max,0);let r=Math.random()*t;for(const b of arr){r-=b.max;if(r<=0)return b}return arr[arr.length-1]}
 function simLot(j,mult){
@@ -615,8 +642,8 @@ function startLot(jid,mult){
   const j=S.jew.find(x=>x.id===jid);if(!j||S.day%3!==0||S.aucSlots<=0)return;
   ac();S.aucSlots--;
   const res=simLot(j,mult);
-  if(res.sold){S.jew=S.jew.filter(x=>x.id!==jid);gain(res.net);S.aucN++;if(S.aucBudget)S.aucBudget[res.winner.n]=Math.max(0,(S.aucBudget[res.winner.n]||0)-res.price);S.aucLast=`${GEMS[j.g].n}の${TY[j.type].n} ${res.price.toLocaleString()}Gで落札(手取り ${res.net.toLocaleString()}G)`}
-  else S.aucLast=`${GEMS[j.g].n}の${TY[j.type].n}は流札(買い手なし)`;
+  if(res.sold){S.jew=S.jew.filter(x=>x.id!==jid);gain(res.net);S.aucN++;if(S.aucBudget)S.aucBudget[res.winner.n]=Math.max(0,(S.aucBudget[res.winner.n]||0)-res.price);S.aucLast={s:1,g:j.g,t:j.type,p:res.price,n:res.net}}
+  else S.aucLast={s:0,g:j.g,t:j.type};
   save();
   LOT={j,res,i:0,fast:false};
   lotDraw(false);
@@ -625,14 +652,14 @@ function startLot(jid,mult){
 function lotDraw(final){
   const {j,res,i}=LOT,ov=document.getElementById('ov'),ev=res.ev[i-1];
   let tail;
-  if(!final)tail=`<button class="btn ghost" onclick="LOT.fast=true">結果を見る</button>`;
+  if(!final)tail=`<button class="btn ghost" onclick="LOT.fast=true">${L("結果を見る")}</button>`;
   else if(res.sold){
     const big=res.price>=j.value*1.5;
-    tail=`<div style="font-size:20px;font-weight:700;margin-top:6px">🔨 落札! ${res.winner.ic}${res.winner.n}</div>${big?'<div style="color:var(--acc);font-weight:800">✨ 大高騰! ✨</div>':''}<div style="margin:6px 0">${res.price.toLocaleString()}G − 手数料 ${res.fee.toLocaleString()}G = <b style="color:var(--acc)">+${res.net.toLocaleString()}G</b></div><button class="btn" onclick="closeOv()">OK</button>`;
-  }else tail=`<div style="font-size:18px;font-weight:700;margin-top:6px">流札…誰も入札しなかった</div><div class="muted">品物は手元に戻ったよ</div><button class="btn" style="margin-top:8px" onclick="closeOv()">OK</button>`;
-  ov.innerHTML=`<div class="modal"><div>${jewSvg(j.g,j.type,j.metal,72)}</div><div style="font-weight:700">${GEMS[j.g].n}の${MT[j.metal].n}${TY[j.type].n}</div><div class="muted">価値の目安 ${j.value}G</div>
+    tail=`<div style="font-size:20px;font-weight:700;margin-top:6px">${L2("🔨 落札! {0}{1}",[res.winner.ic,res.winner.n])}</div>${big?L("<div style=\"color:var(--acc);font-weight:800\">✨ 大高騰! ✨</div>"):''}<div style="margin:6px 0">${L2("{0}G − 手数料 {1}G =",[res.price.toLocaleString(),res.fee.toLocaleString()])} <b style="color:var(--acc)">+${res.net.toLocaleString()}G</b></div><button class="btn" onclick="closeOv()">OK</button>`;
+  }else tail=`<div style="font-size:18px;font-weight:700;margin-top:6px">${L("流札…誰も入札しなかった")}</div><div class="muted">${L("品物は手元に戻ったよ")}</div><button class="btn" style="margin-top:8px" onclick="closeOv()">OK</button>`;
+  ov.innerHTML=`<div class="modal"><div>${jewSvg(j.g,j.type,j.metal,72)}</div><div style="font-weight:700">${fullName(j.g,j.metal,j.type)}</div><div class="muted">${L2("価値の目安 {0}G",[j.value])}</div>
   <div style="font-size:30px;font-weight:800;color:var(--acc);margin:8px 0">${ev?ev.price.toLocaleString()+' G':'—'}</div>
-  <div style="min-height:22px">${ev?ev.g.ic+' '+ev.g.n:(final?'':'入札を待っています…')}</div>
+  <div style="min-height:22px">${ev?ev.g.ic+' '+ev.g.n:(final?'':L("入札を待っています…"))}</div>
   <div class="muted" style="text-align:left;max-height:96px;overflow:auto;margin:8px 0">${res.ev.slice(0,i).map(e=>`${e.g.ic} ${e.g.n} … ${e.price.toLocaleString()}G`).reverse().join('<br>')}</div>${tail}</div>`;
 }
 function lotStep(){
@@ -654,15 +681,15 @@ function lotStep(){
 
 /* ---------- Royal quest / ending / dex ---------- */
 const QUESTS={
- tiara:{n:'女王のティアラ',ic:'👸',cost:20000,e:10,reward:1.4,st:5,hf:.85,
-  desc:'王宮の女王が、世界に二つとないティアラを望んでいる。プラチナの台座に、ダイヤとサファイアを並べ、中央に希少な一粒を。',
-  req:[{g:[5],q:70,n:2,l:'ダイヤ'},{g:[3],q:70,n:2,l:'サファイア'},{g:[16,19],q:0,n:1,l:'ピンクダイヤ か パパラチアサファイア'}]},
- crown:{n:'王の王冠',ic:'🤴',cost:60000,e:15,reward:1.5,st:5,hf:.85,
-  desc:'ティアラを見た王が、自らの王冠の仕立てを頼んできた。中心には、星の核の底に眠るという青い輝きを。',
-  req:[{g:[18],q:70,n:1,l:'ブルーダイヤモンド'},{g:[4],q:70,n:3,l:'エメラルド'},{g:[13],q:70,n:2,l:'ルビー'},{g:[17],q:0,n:1,l:'パライバトルマリン'}]},
- throne:{n:'黄金の玉座',ic:'🏛',cost:250000,e:20,reward:1.2,st:7,hf:.4,
-  desc:'王が望むのは、世界でいちばん希少な宝石を散りばめた黄金の玉座。修行を極めたあなたにしか、頼めない仕事。仕上げの帯はとても狭いよ。',
-  req:[{g:[16],q:70,n:1,l:'ピンクダイヤ'},{g:[17],q:70,n:1,l:'パライバトルマリン'},{g:[18],q:70,n:1,l:'ブルーダイヤモンド'},{g:[19],q:70,n:1,l:'パパラチアサファイア'},{g:[5],q:70,n:3,l:'ダイヤ'},{g:[4],q:70,n:3,l:'エメラルド'},{g:[13],q:70,n:3,l:'ルビー'},{g:[3],q:70,n:3,l:'サファイア'}]}
+ tiara:{n:L("女王のティアラ"),ic:'👸',cost:20000,e:10,reward:1.4,st:5,hf:.85,
+  desc:L("王宮の女王が、世界に二つとないティアラを望んでいる。プラチナの台座に、ダイヤとサファイアを並べ、中央に希少な一粒を。"),
+  req:[{g:[5],q:70,n:2,l:L("ダイヤ")},{g:[3],q:70,n:2,l:L("サファイア")},{g:[16,19],q:0,n:1,l:L("ピンクダイヤ か パパラチアサファイア")}]},
+ crown:{n:L("王の王冠"),ic:'🤴',cost:60000,e:15,reward:1.5,st:5,hf:.85,
+  desc:L("ティアラを見た王が、自らの王冠の仕立てを頼んできた。中心には、星の核の底に眠るという青い輝きを。"),
+  req:[{g:[18],q:70,n:1,l:L("ブルーダイヤモンド")},{g:[4],q:70,n:3,l:L("エメラルド")},{g:[13],q:70,n:2,l:L("ルビー")},{g:[17],q:0,n:1,l:L("パライバトルマリン")}]},
+ throne:{n:L("黄金の玉座"),ic:'🏛',cost:250000,e:20,reward:1.2,st:7,hf:.4,
+  desc:L("王が望むのは、世界でいちばん希少な宝石を散りばめた黄金の玉座。修行を極めたあなたにしか、頼めない仕事。仕上げの帯はとても狭いよ。"),
+  req:[{g:[16],q:70,n:1,l:L("ピンクダイヤ")},{g:[17],q:70,n:1,l:L("パライバトルマリン")},{g:[18],q:70,n:1,l:L("ブルーダイヤモンド")},{g:[19],q:70,n:1,l:L("パパラチアサファイア")},{g:[5],q:70,n:3,l:L("ダイヤ")},{g:[4],q:70,n:3,l:L("エメラルド")},{g:[13],q:70,n:3,l:L("ルビー")},{g:[3],q:70,n:3,l:L("サファイア")}]}
 };
 function reqRows(k){return QUESTS[k].req.map(r=>{const have=S.pol.filter(p=>r.g.includes(p.g)&&p.q>=r.q).length;return{...r,have,ok:have>=r.n}})}
 function curQuestKey(){if(S.quest.stage===1)return 'tiara';if(S.quest.stage===2)return 'crown';if(S.quest.stage>=3&&S.throne&&S.throne.stage===1)return 'throne';return null}
@@ -685,50 +712,50 @@ function maybeStory(){
   if(document.getElementById('ov').classList.contains('on'))return;
   if(S.questNew){
     S.questNew=false;save();SFX.rare(3);
-    showStory({ic:'🏰',title:'王宮からの使者',paras:['あなたの工房の評判は、いつのまにか王国じゅうに広まっていた。','ある朝、王宮の使者が訪ねてくる。「女王陛下が、世界に二つとないティアラを望んでおられます。引き受けていただければ、王室御用達の栄誉を」','依頼の詳しい内容は、新しく現れた「👑王室」タブで見られるよ。']});
+    showStory({ic:'🏰',title:L("王宮からの使者"),paras:[L("あなたの工房の評判は、いつのまにか王国じゅうに広まっていた。"),L("ある朝、王宮の使者が訪ねてくる。「女王陛下が、世界に二つとないティアラを望んでおられます。引き受けていただければ、王室御用達の栄誉を」"),L("依頼の詳しい内容は、新しく現れた「👑王室」タブで見られるよ。")]});
     return;
   }
   if(S.awakeNew){
     S.awakeNew=false;save();SFX.fanfare();
-    showStory({ic:'✨',title:'工房の覚醒',paras:['ツルハシも、研磨機も、作業台も、すべてが極みに達した。修行の日々が、道具に魂を宿らせたのかもしれない。','金色の光が工房を包む。あなたは「無双の職人」と呼ばれるようになった。','ツルハシは金色に輝き、岩は金の粉をまいて砕ける。'],btn:'金色の工房へ'});
+    showStory({ic:'✨',title:L("工房の覚醒"),paras:[L("ツルハシも、研磨機も、作業台も、すべてが極みに達した。修行の日々が、道具に魂を宿らせたのかもしれない。"),L("金色の光が工房を包む。あなたは「無双の職人」と呼ばれるようになった。"),L("ツルハシは金色に輝き、岩は金の粉をまいて砕ける。")],btn:L("金色の工房へ")});
     burst(document.getElementById('ov'),innerWidth/2,innerHeight/3,['#ffd35a','#fff3b0','#ffb300','#fff'],70,{star:true,size:12,v:240,spread:Math.PI*2,dir:0,g:80,dur:1700});
     return;
   }
   if(S.throneNew){
     S.throneNew=false;save();SFX.rare(4);
-    showStory({ic:'🏛',title:'王からの最後の依頼',paras:['王冠を戴いた王が、再びあなたの工房を訪ねてきた。','「余の隣に置く玉座を作ってほしい。世界でいちばん希少な宝石を使って、この国の誇りになるものを」','超レアの宝石4種と、王国の名宝が必要になる。依頼の詳細は「👑王室」タブへ。']});
+    showStory({ic:'🏛',title:L("王からの最後の依頼"),paras:[L("王冠を戴いた王が、再びあなたの工房を訪ねてきた。"),L("「余の隣に置く玉座を作ってほしい。世界でいちばん希少な宝石を使って、この国の誇りになるものを」"),L("超レアの宝石4種と、王国の名宝が必要になる。依頼の詳細は「👑王室」タブへ。")]});
   }
 }
 function questCard(k){
   const Q=QUESTS[k],rows=reqRows(k),ok=questReady();
-  return `<div class="card"><h3>${Q.ic} 依頼: ${Q.n}</h3><div style="font-size:13px;line-height:1.6">${Q.desc}</div></div>
-  <div class="card"><h3>必要なもの</h3>${rows.map(r=>`<div class="row" style="margin:4px 0"><span>${r.ok?'✅':'⬜'} ${r.l}${r.q?'('+grade(r.q)+'以上)':''} ×${r.n}</span><span class="muted">${Math.min(r.have,r.n)}/${r.n}</span></div>`).join('')}
-  <div class="row" style="margin:4px 0"><span>${S.gold>=Q.cost?'✅':'⬜'} 制作費 ${Q.cost.toLocaleString()}G</span><span class="muted">${Math.round(S.gold).toLocaleString()}G</span></div>
-  <div class="row" style="margin:4px 0"><span>${S.energy>=Q.e?'✅':'⬜'} 体力 ${Q.e}</span><span class="muted">${S.energy}</span></div>
-  <div class="muted" style="margin-top:6px">使うのは磨いた宝石。納品すると、制作費の${Math.round(Q.reward*100)}%が報酬として戻ってくるよ。仕上げは${Q.st}回勝負。</div>
-  <button class="btn" style="width:100%;margin-top:8px" ${ok?'':'disabled'} onclick="startRoyal('${k}')">特別な仕上げをはじめる</button></div>`;
+  return `<div class="card"><h3>${L2("{0} 依頼: {1}",[Q.ic,Q.n])}</h3><div style="font-size:13px;line-height:1.6">${Q.desc}</div></div>
+  <div class="card"><h3>${L("必要なもの")}</h3>${rows.map(r=>`<div class="row" style="margin:4px 0"><span>${r.ok?'✅':'⬜'} ${r.l}${r.q?`${L2("({0}以上)",[grade(r.q)])}`:''} ×${r.n}</span><span class="muted">${Math.min(r.have,r.n)}/${r.n}</span></div>`).join('')}
+  <div class="row" style="margin:4px 0"><span>${L2("{0} 制作費 {1}G",[S.gold>=Q.cost?'✅':'⬜',Q.cost.toLocaleString()])}</span><span class="muted">${Math.round(S.gold).toLocaleString()}G</span></div>
+  <div class="row" style="margin:4px 0"><span>${L2("{0} 体力 {1}",[S.energy>=Q.e?'✅':'⬜',Q.e])}</span><span class="muted">${S.energy}</span></div>
+  <div class="muted" style="margin-top:6px">${L2("使うのは磨いた宝石。納品すると、制作費の{0}%が報酬として戻ってくるよ。仕上げは{1}回勝負。",[Math.round(Q.reward*100),Q.st])}</div>
+  <button class="btn" style="width:100%;margin-top:8px" ${ok?'':'disabled'} onclick="startRoyal('${k}')">${L("特別な仕上げをはじめる")}</button></div>`;
 }
-const HALLN=['こじんまりした飾り棚','立派な飾り棚','小さなギャラリー','宝石の大広間','黄金の宝物殿'];
+const HALLN=[L("こじんまりした飾り棚"),L("立派な飾り棚"),L("小さなギャラリー"),L("宝石の大広間"),L("黄金の宝物殿")];
 const hallLevel=()=>{const n=Object.keys(S.dex||{}).length;return n>=20?4:n>=15?3:n>=10?2:n>=5?1:0};
 function vHall(){
   const lv=hallLevel(),wall=['#3a2a20','#3a2f4a','#2c3e50','#4a2f3f','#5a4210'][lv];
-  const royal=[['tiara','女王のティアラ',S.quest.tiaraQ>0,S.quest.tiaraQ],['crown','王の王冠',S.quest.crownQ>0,S.quest.crownQ],['throne','黄金の玉座',S.throne&&S.throne.stage===2,S.throne?S.throne.q:0]];
-  const ttl=q=>q>=90?'傑作':q>=70?'名品':q>=40?'上出来':'及第';
+  const royal=[['tiara',L("女王のティアラ"),S.quest.tiaraQ>0,S.quest.tiaraQ],['crown',L("王の王冠"),S.quest.crownQ>0,S.quest.crownQ],['throne',L("黄金の玉座"),S.throne&&S.throne.stage===2,S.throne?S.throne.q:0]];
+  const ttl=q=>q>=90?L("傑作"):q>=70?L("名品"):q>=40?L("上出来"):L("及第");
   const b=S.best;
-  return `<div class="hall ${lv===4?'l4':''}" style="--wall:${wall}"><div class="ttl">🏛 宝物庫 — ${HALLN[lv]}</div>
-  <div class="shelf">${royal.map(r=>`<div class="slot ${r[2]?'':'dim'}">${royalSvg(r[0],52)}<div>${r[2]?r[1]:'？？？'}</div><div>${r[2]?ttl(r[3]):''}</div></div>`).join('')}</div>
-  <div class="shelf"><div class="slot ${b?'':'dim'}" style="width:auto;min-width:120px">${b&&b.g!==undefined?jewSvg(b.g,b.type,b.metal,52):''}<div>${b?'最高傑作':'？？？'}</div><div>${b?b.name+'('+b.v.toLocaleString()+'G)':''}</div></div></div>
+  return `<div class="hall ${lv===4?'l4':''}" style="--wall:${wall}"><div class="ttl">${L2("🏛 宝物庫 — {0}",[HALLN[lv]])}</div>
+  <div class="shelf">${royal.map(r=>`<div class="slot ${r[2]?'':'dim'}">${royalSvg(r[0],52)}<div>${r[2]?r[1]:L("？？？")}</div><div>${r[2]?ttl(r[3]):''}</div></div>`).join('')}</div>
+  <div class="shelf"><div class="slot ${b?'':'dim'}" style="width:auto;min-width:120px">${b&&b.g!==undefined?jewSvg(b.g,b.type,b.metal,52):''}<div>${b?L("最高傑作"):L("？？？")}</div><div>${b?`${bestName(b)}(${b.v.toLocaleString()}G)`:''}</div></div></div>
   <div class="shelf">${GEMS.map((g,i)=>{const f=S.dex&&S.dex[i]!==undefined;return `<div class="slot ${f?'':'dim'}" style="width:44px">${gemSvg(g.c,30)}</div>`}).join('')}</div>
-  <div class="muted" style="text-align:center">図鑑 ${Object.keys(S.dex||{}).length}/${GEMS.length} — そろうほど部屋が豪華になるよ</div></div>`;
+  <div class="muted" style="text-align:center">${L2("図鑑 {0}/{1} — そろうほど部屋が豪華になるよ",[Object.keys(S.dex||{}).length,GEMS.length])}</div></div>`;
 }
 function vQuest(){
   const st=S.quest.stage;
   if(st===1)return questCard('tiara');
   if(st===2)return questCard('crown');
-  let h=`<div class="card"><h3>👑 王室御用達</h3><div style="font-size:14px">女王のティアラ(品質${S.quest.tiaraQ})と、王の王冠(品質${S.quest.crownQ})を納めた。</div><button class="btn" style="margin-top:8px" onclick="showEnding(true)">エンディングをもう一度見る</button></div>`;
+  let h=`<div class="card"><h3>${L("👑 王室御用達")}</h3><div style="font-size:14px">${L2("女王のティアラ(品質{0})と、王の王冠(品質{1})を納めた。",[S.quest.tiaraQ,S.quest.crownQ])}</div><button class="btn" style="margin-top:8px" onclick="showEnding(true)">${L("エンディングをもう一度見る")}</button></div>`;
   if(S.throne.stage===1)h+=questCard('throne');
-  else if(S.throne.stage===2)h+=`<div class="card"><h3>🏛 黄金の玉座</h3><div style="font-size:14px">修行の果てに、玉座を仕上げた(品質${S.throne.q})。</div><button class="btn" style="margin-top:8px" onclick="showEnding2(true)">もうひとつのエンディングを見る</button></div>`;
-  else h+=`<div class="card muted">ここから先は自由な時間。図鑑のコンプリート(強化タブ)や、もっと高価な宝石づくりを楽しもう。${S.diff===3&&!S.awake?'<br>修行で全部の強化をLv15にすると、何かが起こるかも…':''}</div>`;
+  else if(S.throne.stage===2)h+=`<div class="card"><h3>${L("🏛 黄金の玉座")}</h3><div style="font-size:14px">${L2("修行の果てに、玉座を仕上げた(品質{0})。",[S.throne.q])}</div><button class="btn" style="margin-top:8px" onclick="showEnding2(true)">${L("もうひとつのエンディングを見る")}</button></div>`;
+  else h+=`<div class="card muted">${L2("ここから先は自由な時間。図鑑のコンプリート(強化タブ)や、もっと高価な宝石づくりを楽しもう。{0}",[S.diff===3&&!S.awake?L("<br>修行で全部の強化をLv15にすると、何かが起こるかも…"):''])}</div>`;
   return h+vHall();
 }
 function startRoyal(k){
@@ -745,39 +772,42 @@ function finishRoyal(){
   S.gold-=Q.cost;S.energy-=Q.e;
   const pay=Math.round(Q.cost*Q.reward);gain(pay);S.crafted=(S.crafted||0)+1;
   if(k==='tiara'){S.quest.tiaraQ=q;S.quest.stage=2}else if(k==='crown'){S.quest.crownQ=q;S.quest.stage=3}else{S.throne={stage:2,q}}
-  const ttl=q>=90?'傑作':q>=70?'名品':q>=40?'上出来':'及第';
-  const pays=`<div style="margin:6px 0">報酬 <b style="color:var(--acc)">${pay.toLocaleString()}G</b>(制作費を引くと +${(pay-Q.cost).toLocaleString()}G)</div>`;
+  const ttl=q>=90?L("傑作"):q>=70?L("名品"):q>=40?L("上出来"):L("及第");
+  const pays=`<div style="margin:6px 0">${L("報酬")} <b style="color:var(--acc)">${pay.toLocaleString()}G</b>${L2("(制作費を引くと +{0}G)",[(pay-Q.cost).toLocaleString()])}</div>`;
   SFX.rare(5);
-  if(k==='tiara')showStory({ic:'👸',title:'女王のティアラ、完成!',paras:[`出来栄えは「${ttl}」(品質 ${q})。`,'ティアラを受け取った女王は、しばらく言葉もなく見つめ、それから静かに微笑んだ。「わたくしの髪に、星が降りてきたようね」','その噂を聞きつけて、王からも使者が来た。「王の王冠を、あなたに頼みたい」'],extra:pays,btn:'次の依頼へ',cb:()=>setTab('quest')});
-  else if(k==='crown')showStory({ic:'🤴',title:'王の王冠、完成!',paras:[`出来栄えは「${ttl}」(品質 ${q})。`,'戴冠式の日。王の頭上で、あなたの王冠が青く静かに輝いた。'],extra:pays,btn:'つづく',cb:()=>showEnding(false)});
-  else showStory({ic:'🏛',title:'黄金の玉座、完成!',paras:[`出来栄えは「${ttl}」(品質 ${q})。`,'玉座は王宮の広間の中央に据えられた。ピンクダイヤ、パライバ、ブルーダイヤ、パパラチア。四つの輝きが、星座のように並んで光る。','王は玉座に腰を下ろし、長いあいだ黙っていた。そして静かに言った。「これほどのものを作れる者は、もう他にいない」'],extra:pays,btn:'結末へ',cb:()=>showEnding2(false)});
+  if(k==='tiara')showStory({ic:'👸',title:L("女王のティアラ、完成!"),paras:[`${L2("出来栄えは「{0}」(品質 {1})。",[ttl,q])}`,L("ティアラを受け取った女王は、しばらく言葉もなく見つめ、それから静かに微笑んだ。「わたくしの髪に、星が降りてきたようね」"),L("その噂を聞きつけて、王からも使者が来た。「王の王冠を、あなたに頼みたい」")],extra:pays,btn:L("次の依頼へ"),cb:()=>setTab('quest')});
+  else if(k==='crown')showStory({ic:'🤴',title:L("王の王冠、完成!"),paras:[`${L2("出来栄えは「{0}」(品質 {1})。",[ttl,q])}`,L("戴冠式の日。王の頭上で、あなたの王冠が青く静かに輝いた。")],extra:pays,btn:L("つづく"),cb:()=>showEnding(false)});
+  else showStory({ic:'🏛',title:L("黄金の玉座、完成!"),paras:[`${L2("出来栄えは「{0}」(品質 {1})。",[ttl,q])}`,L("玉座は王宮の広間の中央に据えられた。ピンクダイヤ、パライバ、ブルーダイヤ、パパラチア。四つの輝きが、星座のように並んで光る。"),L("王は玉座に腰を下ろし、長いあいだ黙っていた。そして静かに言った。「これほどのものを作れる者は、もう他にいない」")],extra:pays,btn:L("結末へ"),cb:()=>showEnding2(false)});
   save();
 }
 function resultText(){
-  return `ジェムクラフト エンディング到達!\n難易度${DF().n} / ${S.day}日目 / 総売上 ${Math.round(S.sold).toLocaleString()}G / 作った品 ${S.crafted||0}個${S.best?' / 最高傑作 '+S.best.name+'('+S.best.v.toLocaleString()+'G)':''}\n#ジェムクラフト`;
+  return `${L2("ジェムクラフト エンディング到達!\n難易度{0} / {1}日目 / 総売上 {2}G / 作った品 {3}個{4}\n#ジェムクラフト",[DF().n,S.day,Math.round(S.sold).toLocaleString(),S.crafted||0,S.best?` ${L2("/ 最高傑作 {0}({1}G)",[bestName(S.best),S.best.v.toLocaleString()])}`:''])}`;
+}
+function copyRes2(){
+  try{navigator.clipboard.writeText(window._res2).then(()=>toast(L("コピーしたよ"))).catch(()=>toast(L("コピーできなかった…")))}catch(e){toast(L("コピーできなかった…"))}
 }
 function copyResult(){
-  try{navigator.clipboard.writeText(resultText()).then(()=>toast('コピーしたよ')).catch(()=>toast('コピーできなかった…'))}catch(e){toast('コピーできなかった…')}
+  try{navigator.clipboard.writeText(resultText()).then(()=>toast(L("コピーしたよ"))).catch(()=>toast(L("コピーできなかった…")))}catch(e){toast(L("コピーできなかった…"))}
 }
 function showEnding(replay){
   SFX.fanfare();
-  const rows=[['かかった日数',S.day+'日'],['総売上',Math.round(S.sold).toLocaleString()+' G'],['作った品',(S.crafted||0)+'個'],['納めた注文',S.served+'件'],['オークション落札',(S.aucN||0)+'件'],['最高傑作',S.best?S.best.name+'('+S.best.v.toLocaleString()+'G)':'—'],['図鑑',Object.keys(S.dex||{}).length+' / '+GEMS.length],['難易度',(S.clear>=0&&replay?DIFFS[S.clear].n+'(クリア時)':DF().n)]];
-  const stats=`<div style="margin:10px 0;text-align:left;font-size:13px">${rows.map(r=>`<div class="row" style="padding:3px 0;border-bottom:1px solid var(--line)"><span class="muted">${r[0]}</span><span>${r[1]}</span></div>`).join('')}</div><button class="btn ghost" style="width:100%" onclick="copyResult()">📋 結果をコピー(SNS用)</button>`;
-  showStory({ic:'👑',title:'エンディング — ありがとう、宝石職人さん',paras:['広間は息をのみ、やがて大きな拍手が響いた。岩山の小さな採掘から始まった工房は、いまや王国一の宝飾工房になった。','宝石は、掘る人、磨く人、飾る人、そして身につける人の想いがつながって、はじめて輝く。あなたの手が、そのすべてをつないだ。',replay?'':'ここから先は自由な時間。図鑑のコンプリートや、もっと高価な宝石づくりを、気がすむまで楽しんでね。'].filter(Boolean),extra:stats,btn:replay?'閉じる':'ゲームを続ける',cb:()=>{if(!replay){S.ending=true;S.clear=Math.max(S.clear===undefined?-1:S.clear,S.diff===undefined?1:S.diff);save();setTab('quest')}}});
+  const rows=[[L("かかった日数"),`${L2("{0}日",[S.day])}`],[L("総売上"),Math.round(S.sold).toLocaleString()+' G'],[L("作った品"),`${L2("{0}個",[S.crafted||0])}`],[L("納めた注文"),`${L2("{0}件",[S.served])}`],[L("オークション落札"),`${L2("{0}件",[S.aucN||0])}`],[L("最高傑作"),S.best?`${bestName(S.best)}(${S.best.v.toLocaleString()}G)`:'—'],[L("図鑑"),Object.keys(S.dex||{}).length+' / '+GEMS.length],[L("難易度"),(S.clear>=0&&replay?`${L2("{0}(クリア時)",[DIFFS[S.clear].n])}`:DF().n)]];
+  const stats=`<div style="margin:10px 0;text-align:left;font-size:13px">${rows.map(r=>`<div class="row" style="padding:3px 0;border-bottom:1px solid var(--line)"><span class="muted">${r[0]}</span><span>${r[1]}</span></div>`).join('')}</div><button class="btn ghost" style="width:100%" onclick="copyResult()">${L("📋 結果をコピー(SNS用)")}</button>`;
+  showStory({ic:'👑',title:L("エンディング — ありがとう、宝石職人さん"),paras:[L("広間は息をのみ、やがて大きな拍手が響いた。岩山の小さな採掘から始まった工房は、いまや王国一の宝飾工房になった。"),L("宝石は、掘る人、磨く人、飾る人、そして身につける人の想いがつながって、はじめて輝く。あなたの手が、そのすべてをつないだ。"),replay?'':L("ここから先は自由な時間。図鑑のコンプリートや、もっと高価な宝石づくりを、気がすむまで楽しんでね。")].filter(Boolean),extra:stats,btn:replay?L("閉じる"):L("ゲームを続ける"),cb:()=>{if(!replay){S.ending=true;S.clear=Math.max(S.clear===undefined?-1:S.clear,S.diff===undefined?1:S.diff);save();setTab('quest')}}});
   burst(document.getElementById('ov'),innerWidth/2,innerHeight/3,['#ffd35a','#fff','#ff9ad5','#7affc8','#7ab8ff'],80,{star:true,size:12,v:240,spread:Math.PI*2,dir:0,g:90,dur:1800});
 }
 function showEnding2(replay){
   SFX.fanfare();
-  const rows=[['かかった日数',S.day+'日'],['総売上',Math.round(S.sold).toLocaleString()+' G'],['作った品',(S.crafted||0)+'個'],['玉座の出来栄え','品質 '+(S.throne?S.throne.q:0)],['最高傑作',S.best?S.best.name+'('+S.best.v.toLocaleString()+'G)':'—'],['図鑑',Object.keys(S.dex||{}).length+' / '+GEMS.length]];
-  const txt=`ジェムクラフト 修行モードで玉座まで完成!\n${S.day}日目 / 総売上 ${Math.round(S.sold).toLocaleString()}G / 作った品 ${S.crafted||0}個${S.best?' / 最高傑作 '+S.best.name+'('+S.best.v.toLocaleString()+'G)':''}\n#ジェムクラフト`;
+  const rows=[[L("かかった日数"),`${L2("{0}日",[S.day])}`],[L("総売上"),Math.round(S.sold).toLocaleString()+' G'],[L("作った品"),`${L2("{0}個",[S.crafted||0])}`],[L("玉座の出来栄え"),`${L2("品質 {0}",[S.throne?S.throne.q:0])}`],[L("最高傑作"),S.best?`${bestName(S.best)}(${S.best.v.toLocaleString()}G)`:'—'],[L("図鑑"),Object.keys(S.dex||{}).length+' / '+GEMS.length]];
+  const txt=`${L2("ジェムクラフト 修行モードで玉座まで完成!\n{0}日目 / 総売上 {1}G / 作った品 {2}個{3}\n#ジェムクラフト",[S.day,Math.round(S.sold).toLocaleString(),S.crafted||0,S.best?` ${L2("/ 最高傑作 {0}({1}G)",[bestName(S.best),S.best.v.toLocaleString()])}`:''])}`;
   window._res2=txt;
-  const stats=`<div style="margin:10px 0;text-align:left;font-size:13px">${rows.map(r=>`<div class="row" style="padding:3px 0;border-bottom:1px solid var(--line)"><span class="muted">${r[0]}</span><span>${r[1]}</span></div>`).join('')}</div><button class="btn ghost" style="width:100%" onclick="try{navigator.clipboard.writeText(window._res2).then(()=>toast('コピーしたよ')).catch(()=>toast('コピーできなかった…'))}catch(e){toast('コピーできなかった…')}">📋 結果をコピー(SNS用)</button>`;
-  showStory({ic:'🌟',title:'もうひとつのエンディング — 無双の工房',paras:['修行の末に極みへ至った工房は、王国の歴史に「黄金の工房」として刻まれた。','あなたが磨いた宝石は、これからも誰かの指で、胸元で、そして玉座で輝き続ける。道具に宿った魂も、きっとそれを見守っている。'],extra:stats,btn:replay?'閉じる':'ゲームを続ける',cb:()=>{if(!replay)setTab('quest')}});
+  const stats=`<div style="margin:10px 0;text-align:left;font-size:13px">${rows.map(r=>`<div class="row" style="padding:3px 0;border-bottom:1px solid var(--line)"><span class="muted">${r[0]}</span><span>${r[1]}</span></div>`).join('')}</div><button class="btn ghost" style="width:100%" onclick="copyRes2()">${L("📋 結果をコピー(SNS用)")}</button>`;
+  showStory({ic:'🌟',title:L("もうひとつのエンディング — 無双の工房"),paras:[L("修行の末に極みへ至った工房は、王国の歴史に「黄金の工房」として刻まれた。"),L("あなたが磨いた宝石は、これからも誰かの指で、胸元で、そして玉座で輝き続ける。道具に宿った魂も、きっとそれを見守っている。")],extra:stats,btn:replay?L("閉じる"):L("ゲームを続ける"),cb:()=>{if(!replay)setTab('quest')}});
   burst(document.getElementById('ov'),innerWidth/2,innerHeight/3,['#ffd35a','#fff3b0','#ffb300','#fff','#ff9ad5','#7ab8ff'],100,{star:true,size:12,v:260,spread:Math.PI*2,dir:0,g:90,dur:1900});
 }
 function vDex(){
   const found=GEMS.filter((g,i)=>S.dex&&S.dex[i]!==undefined).length;
-  return `<div class="card"><h3>📖 宝石図鑑 ${found} / ${GEMS.length}</h3><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(78px,1fr))">${GEMS.map((g,i)=>{const q=S.dex?S.dex[i]:undefined,f=q!==undefined;return `<div ${f?ia(i):'class="item"'}>${f?gemSvg(g.c,32):'<div style="height:32px;font-size:22px;opacity:.4">？</div>'}<div style="font-size:10px">${f?g.n:'？？？'}</div><small>${f?(q>0?'最高 '+grade(q):'原石のみ'):'&nbsp;'}</small></div>`}).join('')}</div>${found===GEMS.length?'<div style="margin-top:6px;color:var(--acc)">🎊 図鑑コンプリート!</div>':''}</div>`;
+  return `<div class="card"><h3>${L2("📖 宝石図鑑 {0} / {1}",[found,GEMS.length])}</h3><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(78px,1fr))">${GEMS.map((g,i)=>{const q=S.dex?S.dex[i]:undefined,f=q!==undefined;return `<div ${f?ia(i):'class="item"'}>${f?gemSvg(g.c,32):L("<div style=\"height:32px;font-size:22px;opacity:.4\">？</div>")}<div style="font-size:10px">${f?g.n:L("？？？")}</div><small>${f?(q>0?`${L2("最高 {0}",[grade(q)])}`:L("原石のみ")):'&nbsp;'}</small></div>`}).join('')}</div>${found===GEMS.length?L("<div style=\"margin-top:6px;color:var(--acc)\">🎊 図鑑コンプリート!</div>"):''}</div>`;
 }
 
 /* ---------- Sell ---------- */
@@ -785,15 +815,15 @@ const priceWith=(j,sat)=>Math.round(j.value*S.dem[j.type]*eyeS()*DF().sell*Math.
 const price=j=>priceWith(j,S.sat||{});
 const gemPrice=p=>Math.round(gemVal(p.g,p.s,p.q)*0.6*DF().sell*satMult(p.g));
 function simTotal(){const tmp={...(S.sat||{})};let t=0;for(const j of S.jew){t+=priceWith(j,tmp);tmp[j.g]=(tmp[j.g]||0)+1}return t}
-function demLabel(d){return d>=1.2?'<span class="up">大人気🔥</span>':d<=0.85?'<span class="dn">不人気</span>':'ふつう'}
+function demLabel(d){return d>=1.2?L("<span class=\"up\">大人気🔥</span>"):d<=0.85?L("<span class=\"dn\">不人気</span>"):L("ふつう")}
 function vSell(){
   const total=simTotal();
   const satPills=Object.keys(S.sat||{}).filter(k=>S.sat[k]>=1).map(k=>`<span class="pill dn">${GEMS[k].n} ▼${Math.round((1-satMult(k))*100)}%</span>`).join('');
   const fc=fulfillable();
-  return `<div class="card"><h3>💰 今日の需要</h3>${Object.keys(TY).map(k=>`<span class="pill">${TY[k].n} ×${S.dem[k].toFixed(2)} ${demLabel(S.dem[k])}</span>`).join('')}<div class="muted" style="margin-top:6px">需要は毎朝変わるよ。人気の日に売るのがコツ</div>${satPills?`<div style="margin-top:6px" class="muted">供給過多(同じ宝石を続けて売ると下がる。数日で戻る)</div>${satPills}`:''}</div>
-  ${fc?`<div class="card" onclick="setTab('order')" style="border-color:var(--acc)"><div>📜 注文に合う完成品が${fc}件あるよ。注文のほうが高く売れる!</div></div>`:''}
-  <div class="card"><h3>完成品を売る</h3>${S.jew.length?`<div class="grid">${S.jew.map(j=>`<button ${ia(j.g)} onclick="sellJ(${j.id})">${jewSvg(j.g,j.type,j.metal,40)}<div>${GEMS[j.g].n}${TY[j.type].n}</div><small>売る ${price(j)}G</small></button>`).join('')}</div><button class="btn" style="width:100%;margin-top:10px" onclick="sellAll()">ぜんぶ売る(${total.toLocaleString()}G)</button>`:'<div class="muted">売るものがないよ</div>'}</div>
-  <div class="card"><h3>宝石のまま売る(6割)</h3>${S.pol.length?`<div class="grid">${S.pol.map(p=>`<button ${ia(p.g)} onclick="sellG(${p.id})">${gemSvg(GEMS[p.g].c,36)}<div>${GEMS[p.g].n}</div><small>${gemPrice(p)}G</small></button>`).join('')}</div>`:'<div class="muted">なし</div>'}</div>`;
+  return `<div class="card"><h3>${L("💰 今日の需要")}</h3>${Object.keys(TY).map(k=>`<span class="pill">${TY[k].n} ×${S.dem[k].toFixed(2)} ${demLabel(S.dem[k])}</span>`).join('')}<div class="muted" style="margin-top:6px">${L("需要は毎朝変わるよ。人気の日に売るのがコツ")}</div>${satPills?`<div style="margin-top:6px" class="muted">${L("供給過多(同じ宝石を続けて売ると下がる。数日で戻る)")}</div>${satPills}`:''}</div>
+  ${fc?`<div class="card" onclick="setTab('order')" style="border-color:var(--acc)"><div>${L2("📜 注文に合う完成品が{0}件あるよ。注文のほうが高く売れる!",[fc])}</div></div>`:''}
+  <div class="card"><h3>${L("完成品を売る")}</h3>${S.jew.length?`<div class="grid">${S.jew.map(j=>`<button ${ia(j.g)} onclick="sellJ(${j.id})">${jewSvg(j.g,j.type,j.metal,40)}<div>${jN(j.g,j.type)}</div><small>${L2("売る {0}G",[price(j)])}</small></button>`).join('')}</div><button class="btn" style="width:100%;margin-top:10px" onclick="sellAll()">${L2("ぜんぶ売る({0}G)",[total.toLocaleString()])}</button>`:L("<div class=\"muted\">売るものがないよ</div>")}</div>
+  <div class="card"><h3>${L("宝石のまま売る(6割)")}</h3>${S.pol.length?`<div class="grid">${S.pol.map(p=>`<button ${ia(p.g)} onclick="sellG(${p.id})">${gemSvg(GEMS[p.g].c,36)}<div>${GEMS[p.g].n}</div><small>${gemPrice(p)}G</small></button>`).join('')}</div>`:L("<div class=\"muted\">なし</div>")}</div>`;
 }
 const QUEST_AT=50000;
 function gain(n){S.gold+=n;S.sold+=n;if(S.quest.stage===0&&S.sold>=QUEST_AT){S.quest.stage=1;S.questNew=true}}
@@ -804,61 +834,61 @@ function sellG(id){const p=S.pol.find(x=>x.id===id);if(!p)return;const v=gemPric
 
 /* ---------- Shop ---------- */
 const UPS=[
- ['pick','⛏ ツルハシ','掘る威力アップ。レアな石も出やすくなる(Lv6・Lv11以降は伸びがゆるやか)'],
- ['wheel','✨ 研磨機','緑の帯が広がって研磨が楽になる'],
- ['bench','🔨 作業台','完成品の価値が +10%/Lv(Lv11以降は+3%)'],
- ['bag','🎒 体力袋','最大体力が +5/Lv(Lv11以降は+2)'],
- ['eye','🔍 目利き','注文の報酬 +5%/Lv、売却価格 +2%/Lv(Lv11以降は小さめ)'],
- ['app','🧑‍🔧 弟子','Lv2から雇用。毎朝、今いる層で原石を掘ってきてくれる(Lv2〜3:1個、Lv4〜5:2個…)']
+ ['pick',L("⛏ ツルハシ"),L("掘る威力アップ。レアな石も出やすくなる(Lv6・Lv11以降は伸びがゆるやか)")],
+ ['wheel',L("✨ 研磨機"),L("緑の帯が広がって研磨が楽になる")],
+ ['bench',L("🔨 作業台"),L("完成品の価値が +10%/Lv(Lv11以降は+3%)")],
+ ['bag',L("🎒 体力袋"),L("最大体力が +5/Lv(Lv11以降は+2)")],
+ ['eye',L("🔍 目利き"),L("注文の報酬 +5%/Lv、売却価格 +2%/Lv(Lv11以降は小さめ)")],
+ ['app',L("🧑‍🔧 弟子"),L("Lv2から雇用。毎朝、今いる層で原石を掘ってきてくれる(Lv2〜3:1個、Lv4〜5:2個…)")]
 ];
 function vDiff(){
-  return `<div class="card"><h3>🎚 難易度</h3><div class="opts g2">${DIFFS.map((d,i)=>`<button class="btn ${S.diff===i?'':'ghost'}" onclick="setDiff(${i})">${d.n}</button>`).join('')}</div><div class="muted" style="margin-top:6px">${diffText(DF())}</div><div class="muted">「修行」は強化が進んだ上級者向け(最初からだと体力が足りなくなるよ)。途中でいつでも変えられる。${S.clear>=0?'クリア済みの最高難易度: '+DIFFS[S.clear].n:''}</div></div>`;
+  return `<div class="card"><h3>${L("🎚 難易度")}</h3><div class="opts g2">${DIFFS.map((d,i)=>`<button class="btn ${S.diff===i?'':'ghost'}" onclick="setDiff(${i})">${d.n}</button>`).join('')}</div><div class="muted" style="margin-top:6px">${diffText(DF())}</div><div class="muted">${L2("「修行」は強化が進んだ上級者向け(最初からだと体力が足りなくなるよ)。途中でいつでも変えられる。{0}",[S.clear>=0?L("クリア済みの最高難易度: ")+DIFFS[S.clear].n:''])}</div></div>`;
 }
-function setDiff(i){S.diff=i;if(S.rock)newRock();SFX.buy();toast('難易度: '+DIFFS[i].n);render()}
+function setDiff(i){S.diff=i;if(S.rock)newRock();SFX.buy();toast(`${L2("難易度: {0}",[DIFFS[i].n])}`);render()}
 function vShop(){
   return vDiff()+UPS.map(u=>{const lv=S[u[0]];const c=lv<MAXLV?Math.round(UP[lv-1]*upMul()):0;
-    const cur=u[0]==='app'&&lv===1?'(未雇用)':'';
+    const cur=u[0]==='app'&&lv===1?L("(未雇用)"):'';
     return `<div class="card"><div class="row"><div><h3>${u[1]} Lv${lv}${cur}</h3><div class="muted">${u[2]}</div></div>${c?`<button class="btn sm" ${S.gold<c?'disabled':''} onclick="buyUp('${u[0]}')">${c.toLocaleString()}G</button>`:'<span class="pill">MAX</span>'}</div></div>`}).join('')
-   +`<div class="card"><div class="muted">鉱山の深い層は「採掘」タブで開放、体力は右上の宿屋で回復できるよ。納品した注文: ${S.served}件</div></div>`+vDex();
+   +`<div class="card"><div class="muted">${L2("鉱山の深い層は「採掘」タブで開放、体力は右上の宿屋で回復できるよ。納品した注文: {0}件",[S.served])}</div></div>`+vDex();
 }
-function buyUp(k){const lv=S[k];if(lv>=MAXLV)return;const c=Math.round(UP[lv-1]*upMul());if(S.gold<c)return;S.gold-=c;S[k]++;SFX.buy();toast('強化した!');render()}
+function buyUp(k){const lv=S[k];if(lv>=MAXLV)return;const c=Math.round(UP[lv-1]*upMul());if(S.gold<c)return;S.gold-=c;S[k]++;SFX.buy();toast(L("強化した!"));render()}
 
 /* ---------- Inn ---------- */
 const FOODS=[
- {n:'🍞 パン',e:8,p:30,d:'手軽に体力+8'},
- {n:'🍱 定食',e:20,p:90,d:'しっかり体力+20'},
- {n:'♨️ 温泉',e:15,p:150,d:'体力+15、今日は研磨の緑の帯が広がる'}
+ {n:L("🍞 パン"),e:8,p:30,d:L("手軽に体力+8")},
+ {n:L("🍱 定食"),e:20,p:90,d:L("しっかり体力+20")},
+ {n:L("♨️ 温泉"),e:15,p:150,d:L("体力+15、今日は研磨の緑の帯が広がる")}
 ];
 const foodPrice=f=>Math.round(f.p*Math.pow(1.7,S.eat)*DF().cost/5)*5;
 function openInn(){
   const ov=document.getElementById('ov');ov.onclick=null;ov.classList.add('on');
-  ov.innerHTML=`<div class="modal"><h3 style="margin:0 0 4px;color:var(--acc)">🏨 宿屋</h3><div class="muted">今日の注文: ${S.eat}回 — 頼むほど値段が上がるよ(1回ごとに×1.7)。朝になるとリセット。</div>
-  <div style="margin:10px 0;font-weight:700">⚡ ${S.energy} / ${maxE()}${S.buff?'　♨️ほかほか中':''}</div>
+  ov.innerHTML=`<div class="modal"><h3 style="margin:0 0 4px;color:var(--acc)">${L("🏨 宿屋")}</h3><div class="muted">${L2("今日の注文: {0}回 — 頼むほど値段が上がるよ(1回ごとに×1.7)。朝になるとリセット。",[S.eat])}</div>
+  <div style="margin:10px 0;font-weight:700">⚡ ${S.energy} / ${maxE()}${S.buff?L("　♨️ほかほか中"):''}</div>
   ${FOODS.map((f,i)=>{const pr=foodPrice(f);return `<div class="card" style="text-align:left;margin-bottom:8px"><div class="row"><div><b>${f.n}</b><div class="muted">${f.d}</div></div><button class="btn sm" ${(S.gold<pr||S.energy>=maxE())?'disabled':''} onclick="buyFood(${i})">${pr}G</button></div></div>`}).join('')}
-  <button class="btn ghost" style="width:100%" onclick="closeOv()">閉じる</button></div>`;
+  <button class="btn ghost" style="width:100%" onclick="closeOv()">${L("閉じる")}</button></div>`;
 }
 function buyFood(i){
   const f=FOODS[i],pr=foodPrice(f);
   if(S.gold<pr||S.energy>=maxE()){SFX.err();return}
   ac();S.gold-=pr;S.energy=Math.min(maxE(),S.energy+f.e);S.eat++;if(i===2)S.buff=true;
-  SFX.buy();header();save();openInn();toast(`${f.n} 体力 +${f.e}`);
+  SFX.buy();header();save();openInn();toast(`${L2("{0} 体力 +{1}",[f.n,f.e])}`);
 }
 
 /* ---------- Day / reset ---------- */
 const BEDS=[
- {n:'🌾 野宿',f:.4,p:0,d:'無料。体力は4割だけ回復'},
- {n:'🛏 安宿',f:.75,p:60,d:'体力が7.5割回復'},
- {n:'🏰 上等な部屋',f:1,p:220,d:'体力が全回復 + 翌日は研磨の緑の帯が広がる'}
+ {n:L("🌾 野宿"),f:.4,p:0,d:L("無料。体力は4割だけ回復")},
+ {n:L("🛏 安宿"),f:.75,p:60,d:L("体力が7.5割回復")},
+ {n:L("🏰 上等な部屋"),f:1,p:220,d:L("体力が全回復 + 翌日は研磨の緑の帯が広がる")}
 ];
 const rankIdx=()=>{let k=0;RANKS.forEach((r,i)=>{if(S.sold>=r[0])k=i});return k};
 const bedPrice=b=>Math.round(b.p*(1+0.7*rankIdx())*DF().cost/5)*5;
 const bedGain=b=>Math.round(maxE()*b.f);
 function sleep(){
   const ov=document.getElementById('ov');ov.onclick=null;ov.classList.add('on');
-  ov.innerHTML=`<div class="modal"><h3 style="margin:0 0 4px;color:var(--acc)">🌙 どこで眠る?</h3><div class="muted">体力は残りに足される(最大まで)。称号が上がると宿代も上がるよ。</div><div class="muted">今夜の維持費(工房・税金): ${upkeep().toLocaleString()}G</div>
+  ov.innerHTML=`<div class="modal"><h3 style="margin:0 0 4px;color:var(--acc)">${L("🌙 どこで眠る?")}</h3><div class="muted">${L("体力は残りに足される(最大まで)。称号が上がると宿代も上がるよ。")}</div><div class="muted">${L2("今夜の維持費(工房・税金): {0}G",[upkeep().toLocaleString()])}</div>
   <div style="margin:10px 0;font-weight:700">⚡ ${S.energy} / ${maxE()}</div>
-  ${BEDS.map((b,i)=>{const pr=bedPrice(b),after=Math.min(maxE(),S.energy+bedGain(b));return `<div class="card" style="text-align:left;margin-bottom:8px"><div class="row"><div><b>${b.n}</b><div class="muted">${b.d}</div><div class="muted">→ 体力 ${after} / ${maxE()}</div></div><button class="btn sm" ${S.gold<pr?'disabled':''} onclick="doSleep(${i})">${pr?pr+'G':'無料'}</button></div></div>`}).join('')}
-  <button class="btn ghost" style="width:100%" onclick="closeOv()">やめる</button></div>`;
+  ${BEDS.map((b,i)=>{const pr=bedPrice(b),after=Math.min(maxE(),S.energy+bedGain(b));return `<div class="card" style="text-align:left;margin-bottom:8px"><div class="row"><div><b>${b.n}</b><div class="muted">${b.d}</div><div class="muted">${L2("→ 体力 {0} / {1}",[after,maxE()])}</div></div><button class="btn sm" ${S.gold<pr?'disabled':''} onclick="doSleep(${i})">${pr?pr+'G':L("無料")}</button></div></div>`}).join('')}
+  <button class="btn ghost" style="width:100%" onclick="closeOv()">${L("やめる")}</button></div>`;
 }
 function doSleep(i){
   const b=BEDS[i],pr=bedPrice(b);
@@ -866,12 +896,14 @@ function doSleep(i){
   const up=upkeep();S.gold-=pr;S.gold=Math.max(0,S.gold-up);satDecay();
   S.day++;S.energy=Math.min(maxE(),S.energy+bedGain(b));S.dem=newDemand();S.eat=0;S.buff=(i===2);
   topUp();
-  let msg='🌙 '+S.day+'日目の朝。新しい注文も届いたよ'+(up?'\n🏠 維持費 -'+up.toLocaleString()+'G':'')+(S.day%3===0?'\n🔨 今日はオークションの開催日!':'');
+  let msg=`${L2("🌙 {0}日目の朝。新しい注文も届いたよ",[S.day])}`+(up?`
+${L2("🏠 維持費 -{0}G",[up.toLocaleString()])}`:'')+(S.day%3===0?L("\n🔨 今日はオークションの開催日!"):'');
   const n=S.app>=2?Math.ceil((S.app-1)/2):0;
   if(n){
     let best=0;
     for(let k=0;k<n;k++){const g=pickGem(),r=Math.random(),dd=S.depth*0.06,sz=r<0.6-dd?0:r<0.9-dd?1:2;S.rough.push({id:S.uid++,g,s:sz});dexMark(g,0);best=Math.max(best,GEMS[g].r)}
-    msg+=`\n🧑‍🔧 弟子が原石を${n}個掘ってきたよ`+(best>=2?'(いい石も混じってる!)':'');
+    msg+=`
+${L2("🧑‍🔧 弟子が原石を{0}個掘ってきたよ",[n])}`+(best>=2?L("(いい石も混じってる!)"):'');
   }
   SFX.morning();
   const ov=document.getElementById('ov');ov.classList.remove('on');ov.innerHTML='';
@@ -879,7 +911,7 @@ function doSleep(i){
 }
 function resetAll(){
   const ov=document.getElementById('ov');ov.onclick=null;ov.classList.add('on');
-  ov.innerHTML=`<div class="modal"><div style="margin-bottom:12px">セーブデータを消して最初からやり直す?</div><div class="opts"><button class="btn ghost" onclick="closeOv()">やめる</button><button class="btn" onclick="fresh()">やり直す</button></div></div>`;
+  ov.innerHTML=`<div class="modal"><div style="margin-bottom:12px">${L("セーブデータを消して最初からやり直す?")}</div><div class="opts"><button class="btn ghost" onclick="closeOv()">${L("やめる")}</button><button class="btn" onclick="fresh()">${L("やり直す")}</button></div></div>`;
 }
 function fresh(){S=S0();topUp();craft.sel=[];closeOv()}
 if(!S.orders.length)topUp();

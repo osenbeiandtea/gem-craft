@@ -10,7 +10,7 @@
 3. **💍 加工** — 宝石 × 形（指輪・ペンダント・ブレスレット・イヤリング）× 金属（銀・金・プラチナ）で作る。イヤリングは同じ宝石2個のペア。
 4. **📜 注文** — お客さんの注文に合う品を納めると高く買ってくれる。
 5. **🔨 競売** — 3日に1回のオークション。来場者の好みに合う品が高値になる。
-6. **💰 売却 / 🔧 強化** — 毎日の需要を見て売る。稼いだお金で道具を強化（Lv10まで）。
+6. **💰 売却 / 🔧 強化** — 毎日の需要を見て売る。稼いだお金で道具を強化（Lv15まで）。
 
 体力は毎日限られています。宿屋の食事や、眠る場所（野宿・安宿・上等な部屋）で回復できます。
 
@@ -25,7 +25,17 @@
 - 同じ宝石を売り続けると相場が下がる、オークションの来場者には予算がある、など終盤の駆け引き
 - 修行モードで全強化Lv15にすると「覚醒」。1日1回、体力を使わず10回連打で岩が次々砕ける「無双タイム」が使える
 - レア度に応じた演出（効果音もすべてブラウザ内で合成）
+- 日本語／英語に対応。ブラウザの言語で自動判定し、ページ下の🌐ボタンで切り替えできます
 - 外部通信なし・AI APIなし。セーブはブラウザの localStorage に保存されます
+
+
+## English
+
+**Gem Craft** is a free browser game: mine rocky mountains, polish gems, craft rings, pendants, bracelets and earrings, then sell them through customer orders and auctions. Reach the top rank, craft a royal tiara and crown, and — if you master the hardest difficulty — a golden throne.
+
+- Free, no ads, no login, no data collected. Save data stays in your browser (localStorage).
+- The game starts in your browser's language (Japanese or English). Use the 🌐 button at the bottom of the page to switch.
+- Planning & Creative Direction: FILWEN / Developed with Claude (Anthropic)
 
 ## 公開（GitHub Pages）
 
