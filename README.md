@@ -1,4 +1,4 @@
-# ジェムクラフト (Gem Craft)
+# ジェムクラフト — 宝石工房 (Gem Craft: Jewel Workshop)
 
 岩山で採掘し、石を磨いて指輪・ペンダント・ブレスレットに加工、注文やオークションで売る宝石クラフトゲームです。
 ブラウザだけで遊べる単一HTMLアプリです（スマホ対応）。
@@ -58,3 +58,8 @@ Save data is stored only in your browser (localStorage). Clearing browser data o
 All gems, currency and auctions in this game are fictional. No real-money transactions are involved.
 
 画像素材は使用していません。アイコン・ファビコン・宝石などの図柄はすべてコードで生成したSVG、効果音はブラウザ内で合成しています。
+
+## 免責 / Disclaimer
+
+本作は個人が制作した無料の作品で、Game in a Bottle の「GemCraft」シリーズをはじめとする他の同名・類似名の作品とは関係ありません。
+This is an independent, free hobby game made from scratch. It is not affiliated with the GemCraft series by Game in a Bottle or with any other game of a similar name.
